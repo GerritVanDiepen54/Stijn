@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<script src="Combinations.js"></script>
+<link href="Combinations.css" rel="stylesheet">
+
+<body onload="SetTitle()">
+
+<h1 id="Title">in a Row</h1>
+
+<table id="Players" >
+  <tr>
+    <td>Name</td>
+    <td>Computer</td>
+    <td>Won</td>
+  </tr>
+
+  <tr>
+    <td>X-player:</td>
+    <td><input type="checkbox" id="X_Computer" name="X_Computer" /></td>
+    <td><input type="text" id="X_winner" value="0" size="2" maxlength="2" style="width:30px" readonly /></td>
+  </tr>    
+  <tr>
+    <td>O-player:</td>
+    <td><input type="checkbox" id="O_Computer" name="O_Computer" /></td>
+    <td><input type="text" id="O_winner" value="0" size="2" maxlength="2" style="width:30px" readonly /></td>
+  </tr>
+</table>
+<br>
+<button type="button" onclick="Create()">New Game</button>
+<button type="button" onclick="Advise()">Advice</button>
+
+<p id="OnTurn">OnTurn:</p>
+
+<p id="game"></p>
+
+
+
+<p id="Information" > ViewInformation
+  <input type="checkbox" id="ViewInfo" name="ViewInfo" onclick="ViewInfo()" />
+</p>
+
+<table id="InfoTable" hidden >
+    <tr>
+      <td>Filter</td>
+      <td>Combinations</td>
+      <td>Reason</td>
+    </tr>
+    <tr>
+      <td>
+        <select name="Filter" id="Filter" size=5 onclick="GetFilter(id)">
+            <option value="A">All</option>
+            <option value="X">X-combs</option>
+            <option value="O">O-combs</option>
+            <option value="E">Empty</option>
+            <option value="D">Dead</option>
+        </select>
+      </td>
+      <td>
+        <select name="AllCombs" id="AllCombs" size=5 onclick="Selected(id)">
+            <option value="">All combinations</option>
+        </select>
+      </td>
+      <td>
+        <select name="Reason" id="Reason" size=2 onclick="Selected(id)">
+            <option value="">Reason</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p id="Count">Combs Filter:</p>
+      </td>
+    </tr>
+        <tr>
+      <td>
+        <p id="Move">Move Info:</p>
+      </td>
+    </tr>
+  </table>
+
+
+</body>
+</html>

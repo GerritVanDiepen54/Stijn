@@ -1,0 +1,46 @@
+.mybutton_normal {
+	width:45px;
+	height:45px;
+	font-size:22px;
+	border:1px #808080 solid;
+}
+
+
+.mybutton_hilite {
+	width:45px;
+	height:45px;
+	font-size:22px;
+	border:6px #0a0101 solid;
+}
+
+.mybutton_Xhilite {
+	width:45px;
+	height:45px; 
+	font-size:22px;
+	border:6px #0000FF solid; 
+	background-color: white;
+}
+
+.mybutton_Xnormal {
+	width:45px;
+	height:45px; 
+	font-size:22px;
+	border:3px #0000FF solid; 
+	background-color: lightblue;
+}
+
+.mybutton_Ohilite {
+	width:45px;
+	height:45px; 
+	font-size:22px;
+	border:6px #00FF00 solid; 
+	background-color: white;
+}
+
+.mybutton_Onormal {
+	width:45px;
+	height:45px; 
+	font-size:22px;
+	border:3px #00FF00 solid; 
+	background-color: lightgreen;
+}

@@ -1,0 +1,27 @@
+
+.table_bottom  {
+	border:0px solid grey;
+	border-collapse: collapse;
+	font-size: 14px;
+	height: 18px;
+	background: white;
+	text-align: left;
+	/* width: 80%; */
+}
+
+.table_bottom th,
+.table_bottom tr,
+.table_bottom td {
+	border:1px solid grey;
+	border-collapse: collapse;	
+}
+
+.table_rowcolors {
+	border:0px solid grey;
+	border-collapse: collapse;
+	font-size: 14px;
+	height: 18px;
+	background: white;
+	text-align: left;
+	/* width: 60%;	 */
+} 

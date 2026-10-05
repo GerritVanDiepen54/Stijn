@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="Camping.js"></script>
+
+    <style> 
+        body { 
+            font-family: Arial; 
+        } 
+    </style> 
+
+</head>
+
+<body onload = "Create()">
+
+<table class="table table_top">
+  <tr >
+    <th></th>
+    <th> </th>
+    <th>TentjeBoompje</th>
+  </tr>
+    <tr >
+      <td>data</td>
+      <td> </td>
+      <td>omschrijving</td>
+    </tr>
+    <tr>
+      <td><input type="text" value="1/3" size="1" maxlength="1" readonly/> </td>
+      <td> </td>
+      <td>1/ = 1 tent geplaatst,   /3 = 3 tenten in puzzel aanwezig</td>
+    </tr>
+    <tr>
+      <td><img src="images/Boom.bmp" id="Boom" /></td>
+      <td><input type="text" value="0" size="1" maxlength="1" id="X_Boom" readonly /> </td>
+      <td>Bij elke boom moet een tent (boven/onder/naast)</td>
+    </tr>
+    <tr>
+        <td><img src="images/Tent.bmp" id="Tent" onclick = "Activate(id)"/></td>
+        <td><input type="text" id="X_Tent" value="0" size="1" maxlength="1" onclick = "Activate('Tent')"  readonly  /> </td>
+        <td>Mogen elkaar niet raken (horizontaal/vertikaal/diagonaal)</td>
+    </tr>
+    <tr>
+        <td><img src="images/TentTry.bmp" id="TentTry" onclick = "Activate(id)"/></td>
+        <td><input type="text" id="X_TentTry" value="" size="1" maxlength="1" readonly  onclick = "Activate('TentTry')"/> </td>
+        <td>Voorlopige plek voor een tent</td>
+    </tr>
+    <tr>
+        <td><img src="images/Gras.bmp" id="Gras" onclick = "Activate(id)"/></td>
+        <td><input type="text" id="X_Gras" value="" size="1" maxlength="1" readonly  onclick = "Activate('Gras')"/> </td>
+        <td>Gras, plek voor een tent</td>
+    </tr>
+    <tr>
+        <td><img src="images/GrasNat.bmp" id="GrasNat" onclick = "Activate(id)"/></td>
+        <td><input type="text" id="X_GrasNat" value="" size="1" maxlength="1" readonly  onclick = "Activate('GrasNat')" /> </td>
+        <td>NatGras, kun je beter geen tent neer zetten</td>
+    </tr>
+</table>
+
+Afmeting van de nieuwe puzzel:
+<select id="PuzzleSize">
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>
+</select>
+<br>
+Selecteer actie voor de puzzel: 
+<select id="PuzzleAction" onchange="RunAction(event)">
+  <option value="---">---</option>
+  <option value="Maak nieuwe Puzzel">Nieuwe Puzzel</option>
+  <option value="Leeg actieve Puzzel">Leeg actieve Puzzel</option>
+  <option value="Zet markering uit">Markering uit</option>
+  <option value="Controleer oplossing">Oplossing controleren</option>
+  <option value="Alle Tent? naar Tent">Tent? naar Tent</option>
+  <option value="Help">Help</option>
+</select>
+<br>
+
+<div id="GameArea"> 
+  <p id="NewGame"></p> 
+</div>
+
+</body>
+</html>
+
+
+

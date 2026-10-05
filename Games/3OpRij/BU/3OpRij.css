@@ -1,0 +1,83 @@
+body {
+	font-size: 12px;
+	font-family: Arial;
+}
+
+.button_NieuwSpel {
+	font-size: 16px;
+	font-family: Arial;
+	border: 2px solid red;
+}
+
+.button_NieuwSpel_Actief {
+	font-size: 16px;
+	font-family: Arial;
+	border: 2px solid black;
+}
+
+.button_Game {
+	font-size: 24px;
+	font-family: Arial;
+	border: 1px solid black;
+	height: 100px;
+	width: 100px;
+	display: none;
+}
+
+.button_GameX {
+	font-family: Arial;
+	border: 1px solid black;
+	height: 100px;
+	width: 100px;
+	display: block;
+	color: red;
+	font-size: 36px;
+	transition: font-size 300ms ease;
+}
+
+.button_GameO {
+	font-family: Arial;
+	border: 1px solid black;
+	height: 100px;
+	width: 100px;
+	display: block;
+	color: blue;
+	font-size: 36px;
+	transition: font-size 300ms ease;
+}
+
+
+button .ActiveGame {
+	font-size: 24px;
+	font-family: Arial;
+	border: 1px solid black
+}
+
+.txthgt12 {
+	font-size: 12px;
+}
+.txthgt14 {
+	font-size: 14px;
+}
+.txthgt16 {
+	font-size: 16px;
+}
+
+table .spelerinfo {
+	border:0px solid black;
+	border-collapse: collapse;
+	font-size: 12px;
+	height: 12px;
+	background: white;
+	text-align: left;
+}
+
+table .speelveld {
+	border:1px solid black;
+	border-collapse: collapse;
+	font-size: 14px;
+	height: 14px;
+	background: white;
+	text-align: center;
+}
+

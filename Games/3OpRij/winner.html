@@ -1,0 +1,65 @@
+
+<!DOCTYPE HTML> 
+<html> 
+  
+<head> 
+    <title> 
+        De winnaar
+    </title>     
+</head> 
+  
+
+<body onload="LoadImage()" id = "body" style = "text-align:center;"> 
+      
+    <h1 style = "color:red; font-size: 20px; font-weight: bold;" > 
+        De winnaar 
+    </h1> 
+
+    <script> 
+          
+        function LoadImage() {
+	    var theurl = sessionStorage.getItem("multipage_imagename");
+            var img = new Image();
+            img.id = "newimg";
+
+            document.getElementById('body').appendChild(img);
+
+            img.onload = function() {
+                // alert("Size  wdt: " + this.width + " ,hgt: " + this.height);
+                let newwdt = this.width;
+                let newhgt = this.height;
+
+                let winwdt = window.innerWidth;
+	            let winhgt = window.innerHeight;
+
+                let wdtscale = winwdt / this.width;
+                let hgtscale = winhgt / this.height;
+
+                if (hgtscale < wdtscale) {
+                    newwdt = this.width * hgtscale * 0.9;
+                    newhgt = this.height * hgtscale * 0.9;
+                } else {
+                    newwdt = this.width * wdtscale * 0.9;
+                    newhgt = this.height * wdtscale * 0.9;                
+                }
+                document.body.appendChild(this);
+                img.width = newwdt;
+                img.height = newhgt;
+            };
+            img.src = theurl;
+
+	    waitAndClose(3);
+
+        }
+
+	function waitAndClose(seconds){
+		var milliseconds = seconds * 1000;
+		setTimeout(function(){
+			window.close();
+		}, milliseconds);
+	}
+
+    </script> 
+</body> 
+  
+</html>

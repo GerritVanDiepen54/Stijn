@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gegarandeerd Unieke Tectonic Puzzel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6; display: flex; flex-direction: column;
+            align-items: center; padding: 20px; margin: 0;
+        }
+        h1 { color: #2c3e50; margin-bottom: 5px; }
+        p.subtitle { color: #7f8c8d; margin-top: 0; margin-bottom: 20px; }
+        .controls { margin-bottom: 20px; }
+        button {
+            padding: 10px 20px; font-size: 16px; margin: 0 5px;
+            cursor: pointer; border: none; border-radius: 4px;
+            background-color: #34495e; color: white; transition: background-color 0.2s;
+        }
+        button:hover { background-color: #2c3e50; }
+        button.active { background-color: #27ae60; }
+        .btn-action { background-color: #8e44ad; }
+        .btn-action:hover { background-color: #732d91; }
+        .btn-check { background-color: #2980b9; }
+        .btn-check:hover { background-color: #1f6696; }
+        .btn-danger { background-color: #c0392b; }
+        .btn-danger:hover { background-color: #a93226; }
+        .btn-warning { background-color: #e67e22; }
+        .btn-warning:hover { background-color: #d35400; }
+        .grid-container {
+            display: grid; grid-template-columns: repeat(9, 50px); grid-template-rows: repeat(7, 50px);
+            background-color: #bdc3c7; padding: 4px; border: 4px solid #2c3e50; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .cell {
+            background-color: #fff; display: flex; align-items: center; justify-content: center;
+            position: relative; box-sizing: border-box; border: 0.5px solid #e2e8f0; 
+        }
+        .cell input {
+            width: 100%; height: 100%; border: none; text-align: center;
+            font-size: 20px; font-weight: bold; color: #2980b9; background-color: transparent; outline: none;
+        }
+        .cell input.conflict { color: #c0392b !important; background-color: #fadbd8; }
+        .cell.fixed { font-size: 20px; font-weight: bold; color: #2c3e50; background-color: #f8f9fa; user-select: none; }
+        .border-top { border-top: 4px solid #2c3e50 !important; }
+        .border-bottom { border-bottom: 4px solid #2c3e50 !important; }
+        .border-left { border-left: 4px solid #2c3e50 !important; }
+        .border-right { border-right: 4px solid #2c3e50 !important; }
+        .message { margin-top: 20px; font-size: 18px; font-weight: bold; height: 24px; }
+        .success { color: #27ae60; }
+        .error { color: #c0392b; }
+    </style>
+</head>
+<body>
+    <h1>Tectonic by AI (9x7)</h1>
+    <p class="subtitle">Slechts één unieke oplossing!</p>
+    <div class="controls">
+        <button onclick="loadNewPuzzle()" class="btn-action">Nieuwe Puzzel</button>
+        <button onclick="changeDifficulty('easy')" id="btn-easy" class="active">Makkelijk</button>
+        <button onclick="changeDifficulty('medium')" id="btn-medium">Gemiddeld</button>
+        <button onclick="changeDifficulty('hard')" id="btn-hard">Moeilijk</button>
+        <button onclick="checkPuzzle()" class="btn-check">Controleer</button>
+        <button onclick="resetInputs()" class="btn-danger">Invoer Wissen</button>
+        <button onclick="solvePuzzle()" class="btn-warning">Toon Oplossing</button>
+    </div>
+    <div class="grid-container" id="grid"></div>
+    <div class="message" id="message"></div>
+
+        <script>
+        const PUZZLE_DATABASE = [
+            {
+                zones: [
+                    "1,1,1,1,2,2,2,3,3", "4,4,1,5,5,2,2,3,3", "4,4,4,6,5,5,5,7,3",
+                    "8,8,6,6,6,6,7,7,7", "8,8,8,9,9,9,10,10,7", "11,11,11,12,9,9,10,10,10",
+                    "11,11,12,12,12,13,13,13,13"
+                ],
+                solution: [
+                    "1,2,3,5,2,3,4,3,1", "4,5,4,1,4,1,5,2,4", "1,2,3,2,5,2,3,1,5",
+                    "5,4,5,1,3,4,5,4,3", "3,1,2,4,2,1,2,1,2", "2,4,5,1,3,5,4,5,3",
+                    "3,1,3,2,4,1,3,2,4"
+                ]
+            },
+            {
+                zones: [
+                    "1,1,1,2,2,3,3,3,4", "1,5,1,5,2,2,6,3,4", "5,5,5,7,7,6,6,3,4",
+                    "8,8,7,7,9,6,10,4,4", "8,11,11,7,9,9,10,10,12", "8,11,13,13,13,9,10,12,12",
+                    "11,11,13,13,14,14,14,14,12"
+                ],
+                solution: [
+                    "1,2,3,1,4,1,2,5,3", "4,5,1,5,3,5,4,3,1", "1,2,3,4,2,1,2,5,4",
+                    "3,5,1,5,3,5,4,1,2", "4,2,3,2,1,4,2,3,5", "1,5,1,4,5,3,1,4,1",
+                    "2,3,2,3,1,2,5,3,2"
+                ]
+            }
+        ];
+
+        const rows = 7; const cols = 9;
+        let ZONE_GRID = []; let SOLUTION_GRID = []; let CURRENT_MASK = [];
+        let zoneSizes = {}; let currentDifficulty = 'easy';
+        let solutionCount = 0;
+
+        // Controleert of een getal wettelijk op een positie mag staan
+        function checkValid(board, r, c, val, zoneId) {
+            if (val > zoneSizes[zoneId]) return false;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    if ((row !== r || col !== c) && ZONE_GRID[row][col] === zoneId && board[row][col] === val) return false;
+                }
+            }
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    let nr = r + dr; let nc = c + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                        if (board[nr][nc] === val) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Telt hoeveel oplossingen er mogelijk zijn vanaf de huidige startgetallen
+        function countSolutions(board, index = 0) {
+            if (solutionCount > 1) return; // Optimalisatie: we weten al dat er meer dan 1 is
+            if (index === rows * cols) { solutionCount++; return; }
+
+            let r = Math.floor(index / cols); let c = index % cols;
+            if (board[r][c] !== 0) { countSolutions(board, index + 1); return; }
+
+            let zoneId = ZONE_GRID[r][c];
+            for (let val = 1; val <= zoneSizes[zoneId]; val++) {
+                if (checkValid(board, r, c, val, zoneId)) {
+                    board[r][c] = val;
+                    countSolutions(board, index + 1);
+                    board[r][c] = 0;
+                }
+            }
+        }
+
+        // Genereert een masker met de garantie dat er exact 1 unieke oplossing overblijft
+        function generateUniqueMask(level) {
+            let board = Array.from({length: rows}, () => Array(cols).fill(0));
+            let mask = Array.from({length: rows}, () => Array(cols).fill(1)); // Start volledig gevuld
+
+            // Maak een lijst van alle 63 cellen en schud deze willekeurig
+            let cellPositions = [];
+            for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) cellPositions.push({r, c}); }
+            cellPositions.sort(() => Math.random() - 0.5);
+
+            // Bepaal de ondergrens van het aantal startgetallen per niveau
+            let minClues = level === 'easy' ? 32 : level === 'medium' ? 22 : 14;
+            let currentClues = 63;
+
+            for (let pos of cellPositions) {
+                if (currentClues <= minClues) break;
+
+                // Sla de huidige staat op
+                let oldVal = SOLUTION_GRID[pos.r][pos.c];
+                mask[pos.r][pos.c] = 0; // Probeer het getal onzichtbaar te maken
+
+                // Bouw het testbord op basis van het nieuwe masker
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        board[r][c] = mask[r][c] === 1 ? SOLUTION_GRID[r][c] : 0;
+                    }
+                }
+
+                // Controleer of de puzzel nog uniek oplosbaar is
+                solutionCount = 0;
+                countSolutions(board);
+
+                // Als er meerdere oplossingen ontstaan, herstel het getal direct!
+                if (solutionCount > 1) {
+                    mask[pos.r][pos.c] = 1;
+                } else {
+                    currentClues--;
+                }
+            }
+            return mask;
+        }
+
+        function loadNewPuzzle() {
+            const randomIndex = Math.floor(Math.random() * PUZZLE_DATABASE.length);
+            const selected = PUZZLE_DATABASE[randomIndex];
+            ZONE_GRID = selected.zones.map(row => row.split(',').map(Number));
+            SOLUTION_GRID = selected.solution.map(row => row.split(',').map(Number));
+
+            zoneSizes = {};
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) {
+                    let z = ZONE_GRID[r][c]; zoneSizes[z] = (zoneSizes[z] || 0) + 1;
+                }
+            }
+            applyMask();
+        }
+
+        function applyMask() {
+            CURRENT_MASK = generateUniqueMask(currentDifficulty);
+            renderBoard();
+        }
+
+                function renderBoard() {
+            const gridContainer = document.getElementById('grid');
+            gridContainer.innerHTML = ''; document.getElementById('message').innerText = ''; 
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cellEl = document.createElement('div'); cellEl.classList.add('cell');
+                    const currentZone = ZONE_GRID[r][c];
+                    
+                    if (r === 0 || ZONE_GRID[r-1][c] !== currentZone) cellEl.classList.add('border-top');
+                    if (r === rows - 1 || ZONE_GRID[r+1][c] !== currentZone) cellEl.classList.add('border-bottom');
+                    if (c === 0 || ZONE_GRID[r][c-1] !== currentZone) cellEl.classList.add('border-left');
+                    if (c === cols - 1 || ZONE_GRID[r][c+1] !== currentZone) cellEl.classList.add('border-right');
+
+                    if (CURRENT_MASK[r][c] === 1) {
+                        cellEl.classList.add('fixed'); cellEl.innerText = SOLUTION_GRID[r][c];
+                    } else {
+                        const input = document.createElement('input'); input.type = 'text'; input.maxLength = 1;
+                        input.dataset.row = r; input.dataset.col = c;
+                        input.oninput = function() {
+                            this.value = this.value.replace(/[^1-5]/g, ''); validateLiveFeedback();
+                        };
+                        cellEl.appendChild(input);
+                    }
+                    gridContainer.appendChild(cellEl);
+                }
+            }
+        }
+
+        function validateLiveFeedback() {
+            const inputs = document.querySelectorAll('.cell input');
+            let currentBoard = Array.from({length: rows}, () => Array(cols).fill(null));
+
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) { if (CURRENT_MASK[r][c] === 1) currentBoard[r][c] = SOLUTION_GRID[r][c]; }
+            }
+            inputs.forEach(input => {
+                const r = parseInt(input.dataset.row); const c = parseInt(input.dataset.col);
+                if (input.value) currentBoard[r][c] = parseInt(input.value); input.classList.remove('conflict');
+            });
+
+            inputs.forEach(input => {
+                const r = parseInt(input.dataset.row); const c = parseInt(input.dataset.col);
+                const val = parseInt(input.value); if (!val) return;
+                let hasConflict = false; const currentZone = ZONE_GRID[r][c];
+
+                if (val > zoneSizes[currentZone]) hasConflict = true;
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        if ((row !== r || col !== c) && ZONE_GRID[row][col] === currentZone && currentBoard[row][col] === val) hasConflict = true;
+                    }
+                }
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        const nr = r + dr; const nc = c + dc;
+                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) { if (currentBoard[nr][nc] === val) hasConflict = true; }
+                    }
+                }
+                if (hasConflict) input.classList.add('conflict');
+            });
+        }
+
+        function changeDifficulty(level) {
+            currentDifficulty = level;
+            ['easy', 'medium', 'hard'].forEach(lvl => document.getElementById(`btn-${lvl}`).classList.remove('active'));
+            document.getElementById(`btn-${level}`).classList.add('active'); applyMask();
+        }
+
+        function checkPuzzle() {
+            const inputs = document.querySelectorAll('.cell input');
+            let allCorrect = true; let complete = true; let hasConflicts = false;
+            
+            inputs.forEach(input => {
+                const r = parseInt(input.dataset.row); const c = parseInt(input.dataset.col); const val = parseInt(input.value);
+                if (!val) complete = false; else if (val !== SOLUTION_GRID[r][c]) allCorrect = false;
+                if (input.classList.contains('conflict')) hasConflicts = true;
+            });
+
+            const msgEl = document.getElementById('message');
+            if (hasConflicts) { msgEl.innerText = "Er staan gemarkeerde rode fouten op het bord!"; msgEl.className = "message error"; }
+            else if (!complete) { msgEl.innerText = "De puzzel is nog niet volledig ingevuld!"; msgEl.className = "message error"; }
+            else if (allCorrect) { msgEl.innerText = "Gefeliciteerd! De Tectonic is correct opgelost! 🎉"; msgEl.className = "message success"; }
+            else { msgEl.innerText = "Er klopt iets niet. Controleer je invoer."; msgEl.className = "message error"; }
+        }
+
+        function resetInputs() {
+            document.querySelectorAll('.cell input').forEach(input => { input.value = ''; input.classList.remove('conflict'); });
+            document.getElementById('message').innerText = '';
+        }
+
+        function solvePuzzle() {
+            document.querySelectorAll('.cell input').forEach(input => {
+                const r = parseInt(input.dataset.row); const c = parseInt(input.dataset.col);
+                input.value = SOLUTION_GRID[r][c]; input.classList.remove('conflict');
+            });
+            const msgEl = document.getElementById('message');
+            msgEl.innerText = "Oplossing is succesvol weergegeven!"; msgEl.className = "message success";
+        }
+
+        window.onload = loadNewPuzzle;
+    </script>
+</body>
+</html>

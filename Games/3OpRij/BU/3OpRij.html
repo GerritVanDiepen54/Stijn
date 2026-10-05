@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+	<meta charset="UTF-8">
+	<title>Stijn's Boter, Kaas en Eieren</title>
+
+	<h2> Stijns 3 op een rij </h2>
+
+	<link href="3OpRij.css" rel="stylesheet">
+
+	<script type="text/javascript" src="3OpRij.js"></script>
+</head>
+
+<body> 
+
+	<div id="divimage" style="width: 310px; height: 40px; position: relative; overflow: hidden;"> 
+		<picture>
+		   <img src="stijn.jpg" id="image" style="width: 360px; position: absolute; top: -190px; left: 0px; bottom: -230px; right: 0px" />
+		</picture>
+	 </div>
+
+	<br/>
+
+	<table class="spelerinfo">
+		<tr>
+			<th class="spelerinfo" style="width:20px" height="14px">id</th>
+			<th class="spelerinfo" style="width:150px" height="14px">naam</th>
+			<th class="spelerinfo" style="width:60px" height="14px">winst</th>
+			<th class="spelerinfo" style="width:100px" height="14px">computer</th>
+		</tr>
+		<tr>
+			<td class="spelerinfo" style="width:20px" height="14px">X</td>
+			<td class="spelerinfo" style="width:150px" height="14px">
+				<input type="text" id="nameX" value="X"  size="12" maxlength="20" height="14px"/>
+			</td>
+			<td class="spelerinfo" style="width:60px" height="14px">
+				<input type="text" id="wonX" value="0" size="2" maxlength="2" readonly/>
+			</td>
+			<td class="spelerinfo" style="width:100px" height="14px">
+				<select name="compX" id="compX">
+					<option value="nee">nee</option>
+					<option value="zwak">zwak</option>
+					<option value="middel">middel</option>
+					<option value="sterk">sterk</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="spelerinfo" style="width:20px" height="14px">O</td>
+			<td class="spelerinfo" style="width:150px" height="14px">
+				<input type="text" id="nameO" value="O"  size="12" maxlength="20" height="14px"/>
+			</td>
+			<td class="spelerinfo" style="width:60px" height="14px">
+				<input type="text" id="wonO" value="0" size="2" maxlength="2" readonly/>
+			</td>
+			<td class="spelerinfo" style="width:100px" height="14px">
+				<select name="compO" id="compO">
+					<option value="nee">nee</option>
+					<option value="zwak">zwak</option>
+					<option value="middel">middel</option>
+					<option value="sterk">sterk</option>
+				</select>
+			</td>
+		</tr>
+	  </table>
+	  
+
+	<br/>
+	<button class="button_NieuwSpel" id="nieuwspel" onclick="nieuwSpel()">Nieuw spel</button>
+	<br/>
+	<br/>
+	<label for="message" id="message" class="txthgt16">Klik op [nieuw spel] om te beginnen</label>
+	<br/>
+
+
+	<table id="speelveld">
+		<tr>
+			<td><button class="button_Game" onclick="veldGekozen(0,0)" id="rij_0_kolom_0"></button></td>
+			<td><button class="button_Game" onclick="veldGekozen(0,1)" id="rij_0_kolom_1"></button></td>
+			<td><button class="button_Game" onclick="veldGekozen(0,2)" id="rij_0_kolom_2"></button></td>
+		</tr>
+		<tr>
+			<td><button class="button_Game" onclick="veldGekozen(1,0)" id="rij_1_kolom_0"></button></td>
+			<td><button class="button_Game" onclick="veldGekozen(1,1)" id="rij_1_kolom_1"></button></td>
+			<td><button class="button_Game" onclick="veldGekozen(1,2)" id="rij_1_kolom_2"></button></td>
+		</tr>
+		<tr>
+			<td><button class="button_Game" onclick="veldGekozen(2,0)" id="rij_2_kolom_0"></button></td>
+			<td><button class="button_Game" onclick="veldGekozen(2,1)" id="rij_2_kolom_1"></button></td>
+			<td><button class="button_Game" onclick="veldGekozen(2,2)" id="rij_2_kolom_2"></button></td>
+		</tr>
+	</table>
+
+	<br/>
+	<input type="checkbox" id="sound" name="sound">
+  	<label for="sound">Geluid aan</label>
+
+
+</body>
+</html>

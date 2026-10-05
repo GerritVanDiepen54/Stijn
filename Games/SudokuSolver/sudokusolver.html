@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<style>
+    :root { --border-bold: 3px solid #333; }
+
+    .sudoku-grid {
+        display: grid;
+        grid-template-columns: repeat(9, 45px);
+        width: max-content;
+        border: var(--border-bold);
+        margin: 20px auto;
+    }
+
+    .sudoku-cell {
+        width: 45px;
+        height: 45px;
+        text-align: center;
+        font-size: 1.2rem;
+        border: 1px solid #000000;
+        box-sizing: border-box;
+        background-color: rgb(215, 230, 226);
+    }
+    .sudoku-cell-mark {
+        width: 45px;
+        height: 45px;
+        text-align: center;
+        font-size: 1.2rem;
+        border: 1px solid #000000;
+        box-sizing: border-box;
+        background-color: rgb(167, 212, 200);
+    }
+
+    .center-block {
+        display: block;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    h1 {
+        text-align:center;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+</style>
+
+</head>
+<body>
+<title>Sudoku Solver</title> 
+<h1>Sudoku Solver</h1>
+
+<input class="center-block" type='button' id='Info' value='Enter numbers in Sudoku and click Solve Sudoku' readonly />
+
+<div id="grid" class="sudoku-grid"></div>
+
+<br/>
+<button class="center-block" onclick="Clear()">Empty Sudoku</button>
+<br/>
+<button class="center-block" onclick="SolveActiveNumbers()">Solve Sudoku</button>
+<br/>
+<input class="center-block" type='button' id='Try' value='Try: ' readonly />
+
+<script>
+
+    const N = 9;
+    let count = 0;
+
+    function isSafe(sudoku, row, column, num) {
+        // check if we find the same num in the similar row , we return false
+        for (let x = 0; x < 9; x++) {
+            if (sudoku[row][x] === num) {
+                return false;
+            }
+        }
+
+        // check if we find the same num in the similar column , we return false
+        for (let x = 0; x < 9; x++) {
+            if (sudoku[x][column] === num) {
+                return false;
+            }
+        }
+
+        // check if we find the same num in the particular 3*3 matrix, we return false
+        const startRow = row - (row % 3);
+        const startCol = column - (column % 3);
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (sudoku[i + startRow][j + startCol] === num) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function solveSudoku(sudoku, row, column) {
+        count++;
+        document.getElementById("Try").value = "Try: " + count.toString();
+
+        if (count > 1000000) {
+            return false;
+        }
+
+        if (row === N - 1 && column === N) {
+            return true;
+        }
+
+        if (column === N) {
+            row++;
+            column = 0;
+        }
+
+        if (sudoku[row][column] > 0) {
+            return solveSudoku(sudoku, row, column + 1);
+        }
+
+        for (let num = 1; num <= N; num++) {
+            if (isSafe(sudoku, row, column, num)) {
+                sudoku[row][column] = num;
+                if (solveSudoku(sudoku, row, column + 1)) {
+                    return true;
+                }
+            }
+            sudoku[row][column] = 0;
+        }
+        return false;
+    }
+
+    function solver(sudoku) {
+        if (solveSudoku(sudoku, 0, 0)) {
+            count = 0;
+            return sudoku;
+        } else {
+            count = 0;
+            return false;
+        }
+    }
+
+
+
+
+    let sudoku = create2Darr(9, 9);
+
+    function create2Darr(rows, columns){
+    let arr = [];
+    let value = 0;
+
+    // creating two-dimensional array
+    for (let r = 0; r < rows; r++) {
+        arr[r] = [];
+        for (let c = 0; c < columns; c++) {
+        arr[r][c]= value;
+        }
+    }
+    return arr;
+    } 
+
+    let MarkedCells =[ 1, 2, 3, 7, 8, 9,
+                      10,11,12,16,17,18,
+                      19,20,21,25,26,27,
+                      31,32,33,
+                      40,41,42,
+                      49,50,51,
+                      55,56,57,61,62,63,
+                      64,65,66,70,71,72,
+                      73,74,75,79,80,81] 
+
+    const grid = document.getElementById('grid');
+
+    // Genereer 81 input cellen
+    for (let i = 0; i < 81; i++) {
+        let clsname = cell_classname(i);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.inputMode = 'numeric';
+        input.className = clsname;  // 'sudoku-cell';
+        input.maxLength = 1;
+        input.id = i.toString();
+
+        input.addEventListener("keydown", updateValue);
+        grid.appendChild(input);
+    }
+
+    function updateValue(e) {
+
+        // $('#Input_TextVar2').addEventListener("keypress", function(e){
+        //     var text = this.value.replace(/[^0-9]/g, '') ;
+        //     if (this.value != text){
+        //         this.value = text;
+        //     }
+        // });
+
+        let key = e.code.toString();
+        let idnr = parseInt(this.id);
+        let oldval = document.getElementById(idnr).value;
+        let rnr = row(idnr);
+        let cnr = column(idnr);
+        let valid = " 123456789"
+
+        if(valid.includes(oldval) == false){
+            oldval = " ";
+        }
+        if(oldval == "") oldval = " ";
+
+        switch(key) {
+            case "ArrowLeft":
+                if(cnr > 0) { 
+                    document.getElementById(idnr - 1).focus();
+                }
+                break; 
+            case "ArrowRight":
+                if(cnr < 8) {                  
+                    document.getElementById(idnr + 1).focus();
+                }
+                break; 
+            case "ArrowUp":
+                if(rnr > 0) { 
+                    document.getElementById(idnr - 9).focus();
+                }
+                break;   
+            case "ArrowDown":
+                if(rnr < 8) { 
+                    document.getElementById(idnr + 9).focus();
+                }
+                break;                 
+            case "Digit0":
+                e.target.value = ' ';
+                document.getElementById(idnr).style.color="black";
+                break; 
+            case "Digit1":
+                e.target.value = '1';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit2":
+                e.target.value = '2';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit3":
+                e.target.value = '3';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit4":
+                e.target.value = '4';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit5":
+                e.target.value = '5';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit6":
+                e.target.value = '6';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit7":
+                e.target.value = '7';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit8":
+                e.target.value = '8';
+                document.getElementById(idnr).style.color="red";
+                break; 
+            case "Digit9":
+                e.target.value = '9';
+                document.getElementById(idnr).style.color="red";
+                break;  
+            case "Backquote":
+                e.target.value = oldval;
+                document.getElementById(idnr).style.color="black";
+                break;                  
+                
+                
+
+            default:
+                e.target.value = oldval;
+                // document.getElementById(idnr).value = oldval;
+                // document.getElementById(idnr).focus();
+                // document.getElementById(idnr).value = oldval;
+                // console.log("IdNr:" + idnr + " , Old: '" + oldval + "'");
+                console.log("Not supported key: " + key + " ,Restore: >" + oldval + "<");            
+                break;
+        }
+    }
+
+
+    function row(idnr){
+        let rest = idnr;
+        let rwnr = 0;
+        while(rest >= 9){
+            rest -= 9
+            rwnr++;
+        }
+        return rwnr;
+    }
+
+    function column(idnr){
+        let rest = idnr
+        while(rest >= 9){
+            rest -= 9;
+        }
+        return rest;
+    }
+
+    function cell_classname(idnr){
+        let mcnr = idnr + 1;
+        let clsname = "sudoku-cell"
+
+        if(MarkedCells.indexOf(mcnr) >= 0){
+            clsname = "sudoku-cell-mark"
+        }
+        return clsname;
+    }
+
+
+    
+    function ReadButtons(){
+        for (let r = 0; r < 9; r++) {
+            for (let c = 0; c < 9; c++) {
+                let ibttn = (r * 9) + c;
+                let bttn = document.getElementById(ibttn.toString());
+                if(bttn.value == ""){
+                        sudoku[r][c] = 0;
+                } else {
+                        sudoku[r][c] = parseInt(bttn.value);
+                }
+            }
+        }
+    }
+
+    function SolveActiveNumbers(){
+
+        ReadButtons();
+
+        let solved = solver(sudoku);
+
+        if(solved){
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                        let val = solved[r][c];
+                        let ibttn = (r * 9) + c;
+                        let bttn = document.getElementById(ibttn.toString());
+                        bttn.value = val.toString();
+                }
+            }
+        }else {
+            alert("No solution ...")
+        }
+    }
+
+    function Clear(){
+        sudoku = create2Darr(9, 9);
+
+        for(let i=0; i<81; i++){
+            let bttn = document.getElementById(i.toString());
+            bttn.value = "";
+            document.getElementById(i.toString()).style.color="black";
+        }
+    }
+
+
+
+
+</script>
+
+</body>
+</html>

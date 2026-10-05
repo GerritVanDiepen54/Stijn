@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ZeeSlag</title>
+    <h2>ZeeSlag</h1>
+    <link href="CSS/dynamic-dialog.css" rel="stylesheet">
+    <script src="JS/Zeeslag.js"></script>
+    <script src="JS/ZoomWindow.js"></script>
+    <script src="JS/dynamic-dialog.js"></script>
+</head>
+
+
+<style>
+.group_large {
+  display: flex;          /* Maakt de container een flexbox */
+  align-items: center;    /* Zorgt voor perfecte verticale uitlijning */
+  gap: 4px;               /*  Geeft wat ruimte tussen de button en de afbeelding */
+  margin-top: 4px;
+}
+
+.button_large {
+  width: 34px;
+  height: 34px;
+  background-color:beige;
+  /* padding: 4 15px;      */
+  box-sizing: border-box;  /* Zorgt dat padding de button niet hoger maakt dan 34px */
+}
+.button_large_OK {
+  width: 34px;
+  height: 34px;
+  /* padding: 4 15px;      */
+  background-color: aquamarine;
+  box-sizing: border-box;  /* Zorgt dat padding de button niet hoger maakt dan 34px */
+}
+
+.img_large {
+  opacity: 0.4;
+  height: 34px;
+  width: 34px;
+  display: block;          /* Verwijdert de standaard witruimte onder een afbeelding */
+  box-sizing: border-box;
+  border: 1px solid black;
+}
+
+.img_large_mark {
+  opacity: 0.4;
+  height: 34px;
+  width: 34px;
+  display: block;          /* Verwijdert de standaard witruimte onder een afbeelding */
+  box-sizing: border-box;
+  border: 4px solid aquamarine;
+}
+
+.img_large_error {
+  opacity: 0.4;
+  height: 34px;
+  width: 34px;
+  display: block;          /* Verwijdert de standaard witruimte onder een afbeelding */
+  box-sizing: border-box;
+  border: 8px solid red;
+}
+
+.img_large_fixed {
+  height: 34px;
+  width: 34px;
+  display: block;          /* Verwijdert de standaard witruimte onder een afbeelding */
+  box-sizing: border-box;
+  border: 2px solid green;
+}
+
+.group_small {
+  display: flex;          /* Maakt de container een flexbox */
+  align-items: center;    /* Zorgt voor perfecte verticale uitlijning */
+  gap: 2px;               /*  Geeft wat ruimte tussen de button en de afbeelding */
+  margin-top: 2px;
+}
+
+.button_small {
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;  /* Zorgt dat padding de button niet hoger maakt dan 24px */
+}
+
+.button_small_OK {
+  width: 24px;
+  height: 24px;
+  background-color: aquamarine;
+  box-sizing: border-box;  /* Zorgt dat padding de button niet hoger maakt dan 24px */
+}
+
+.img_small {
+  height: 24px;
+  width: 24px;
+  display: block;          /* Verwijdert de standaard witruimte onder een afbeelding */
+}
+
+/* 
+boten:      kies:
+1 xxxx ?    x xxx
+2 xxx  ?    x
+3 xx   ?    x   x
+4 x    ?
+*/
+</style>
+
+<body onload="StartGame()">
+
+  <dialog id="msg-dialog" aria-labelledby="msg-title">
+    <h2 id="msg-title" tabindex="-1">Title</h2>
+    <label id="msg-body" tabindex="-1">Message</label><br><br>
+    <button commandfor="msg-dialog" command="close">
+      Sluiten
+    </button>
+  </dialog>   
+
+
+
+
+  <p>
+ 		Boten zijn (on)zichtbaar horizontaal of vertikaal geplaatst<br>
+    rij1/kolom1: aanwezige boten in puzzel per rij/kolom<br>
+		rij12/kolom12: zichtbare boten per rij/kolom<br>
+		Boten mogen elkaar niet raken, ook niet diagonaal !!<br>     
+  </p>
+  Totaal 20 Boot elementen. Aantal zichtbaar: <input type="text" id="Zichtbaar" value="0" size=2 readonly>
+  <br>
+ 	<br>
+	<label id="Message"></label> 
+  <br>
+  <button>Boten in puzzel</button>  <button>Geplaatst</button>    <button>Selecteer te plaatsen cel</button>
+  <!-- regel 1 -->
+  <div class="group_small">
+    <button class="button_small">1</button>
+    <img src="Image/img_boot_hs.png" alt="Img" class="img_small">
+    <img src="Image/img_boot_m.png" alt="Img" class="img_small">
+    <img src="Image/img_boot_m.png" alt="Img" class="img_small">
+    <img src="Image/img_boot_he.png" alt="Img" class="img_small">
+    <button class="button_small" id="boot4">0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_vs.png" alt="Img" class="img_small" id='img_boot_vs' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_hs.png" alt="Img" class="img_small" id='img_boot_hs' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_m.png" alt="Img" class="img_small" id='img_boot_m' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_he.png" alt="Img" class="img_small" id='img_boot_he' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+  </div>
+  <!-- regel 2 -->
+  <div class="group_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_m.png" alt="Img" class="img_small" id='img_boot_m' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>  
+  </div>
+  <!-- regel 3 -->
+  <div class="group_small">
+    <button class="button_small">2</button>
+    <img src="Image/img_boot_hs.png" alt="Img" class="img_small">
+    <img src="Image/img_boot_m.png" alt="Img" class="img_small">
+    <img src="Image/img_boot_he.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <button class="button_small" id="boot3">0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_m.png" alt="Img" class="img_small" id='img_boot_m' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small" id='img_leeg' onclick='imgselectclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small" id='img_leeg' onclick='imgselectclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small" id='img_leeg' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>  
+  </div>
+  <!-- regel 4 -->
+  <div class="group_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_ve.png" alt="Img" class="img_small" id='img_boot_ve' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_vs.png" alt="Img" class="img_small" id='img_boot_vs' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>  
+  </div>
+  <!-- regel 5 -->
+  <div class="group_small">
+    <button class="button_small">3</button>
+    <img src="Image/img_boot_hs.png" alt="Img" class="img_small">
+    <img src="Image/img_boot_he.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <button class="button_small" id="boot2">0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_boot_ve.png" alt="Img" class="img_small" id='img_boot_ve' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>  
+  </div>
+  <!-- regel 6 -->
+  <div class="group_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_mijn.png" alt="Img" class="img_small" id='img_mijn' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>  
+  </div>
+  <!-- regel 7 -->
+  <div class="group_small">
+    <button class="button_small">4</button>
+    <img src="Image/img_mijn.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <button class="button_small" id="mijn">0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_small">
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>
+    <img src="Image/img_water.png" alt="Img" class="img_small" id='img_water' onclick='imgselectclick(id)'>  
+  </div>
+
+
+
+  <br>
+  <br>
+  <button onclick='Help()'>Hulp</button>
+  <button onclick='ShowSolution(false)'>Toon Oplossing</button>
+  <button onclick='ShowSolution(true)'>Controleer Oplossing</button>
+  <button onclick='NewPuzzle()'>Nieuwe puzzel</button>
+
+  <div class="group_large">
+    <button onclick='CheckWater()'>Actief:</button>
+    <img onclick="DebugIMG()" src="Image/img_leeg.png" alt="Img" class="img_large" id='img-actief'>
+    <label id="ActiveMessage"> klik op cel</label>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id="R0C0"></button>
+    <button class="button_large" id="R0C1">0</button>
+    <button class="button_large" id="R0C2">0</button>
+    <button class="button_large" id="R0C3">0</button>
+    <button class="button_large" id="R0C4">0</button>
+    <button class="button_large" id="R0C5">0</button>
+    <button class="button_large" id="R0C6">0</button>
+    <button class="button_large" id="R0C7">0</button>
+    <button class="button_large" id="R0C8">0</button>
+    <button class="button_large" id="R0C9">0</button>
+    <button class="button_large" id="R0C10">0</button>
+    <button class="button_large" id="R0C11"></button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large"  id="R1C0">0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C1' onclick='imgclick(id)'>    
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R1C10' onclick='imgclick(id)'>
+    <button class="button_large"  id="R1C11v">0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R2C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R2C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R2C11v'>0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R3C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R3C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R3C11v'>0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R4C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R4C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R4C11v'>0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R5C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R5C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R5C11v'>0</button>
+  </div>
+
+
+  <div class="group_large">
+    <button class="button_large"  id="R6C0">0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R6C10' onclick='imgclick(id)'>
+    <button class="button_large" id="R6C11v">0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R7C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R7C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R7C11v'>0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R8C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R8C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R8C11v'>0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id='R9C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R9C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R9C11v'>0</button>
+  </div>
+  
+  <div class="group_large">
+    <button class="button_large" id='R10C0'>0</button>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C1' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C2' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C3' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C4' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C5' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C6' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C7' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C8' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C9' onclick='imgclick(id)'>
+    <img src="Image/img_leeg.png" alt="Img" class="img_large" id='R10C10' onclick='imgclick(id)'>
+    <button class="button_large" id='R10C11v'>0</button>
+  </div>
+
+  <div class="group_large">
+    <button class="button_large" id="R11C0v"></button>
+    <button class="button_large" id="R11C1v">0</button>
+    <button class="button_large" id="R11C2v">0</button>
+    <button class="button_large" id="R11C3v">0</button>
+    <button class="button_large" id="R11C4v">0</button>
+    <button class="button_large" id="R11C5v">0</button>
+    <button class="button_large" id="R11C6v">0</button>
+    <button class="button_large" id="R11C7v">0</button>
+    <button class="button_large" id="R11C8v">0</button>
+    <button class="button_large" id="R11C9v">0</button>
+    <button class="button_large" id="R11C10v">0</button>
+    <button class="button_large" id="R11C11v"></button>
+  </div>
+
+
+</body>
+
+
+
+</html>
+
+
+
+
