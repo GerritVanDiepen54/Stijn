@@ -13,7 +13,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
-            color: #333;
+            /* color: #333; */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -61,7 +61,7 @@
             grid-template-columns: repeat(9, var(--cell-size));
             grid-template-rows: repeat(7, var(--cell-size));
             gap: 0;
-            background-color: #000;
+            /* background-color: #000; */
             padding: var(--border-thick);
             border-radius: 4px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -118,12 +118,37 @@
             font-weight: bold;
             min-height: 24px;
         }
+
+        /* CSS: Voorkomt ongewenste scrollbars en zorgt voor een vloeiende overgang */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            /* background-color: #f4f4f9;   */
+            /* Pas overflow aan op basis van je voorkeur (bijv. 'hidden' voor 'both', of 'x-hidden' voor 'width') */
+            overflow-x: hidden;
+        }
+
+        #page-content {
+            /* Pas deze breedte aan naar de breedte die je website of element minimaal nodig heeft */
+            width: 525px; /* 1024px; */
+            margin: 0 auto;
+            /* background: #ffffff; */
+            box-sizing: border-box;
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.25s ease-out; /* Zorgt voor een vloeiende zoom bij het kantelen */
+        }
     </style>
 </head>
 <body>
-
+    <!-- De hoofdcontainer die geschaald gaat worden -->
+    <div id="page-content">
     <h1>AI_Tectonic Puzzel 9x7</h1>
-    <p>Vul de vakken in. Elk gebied van <i>n</i> cellen bevat de getallen 1 t/m <i>n</i>. Gelijke getallen mogen elkaar nooit raken.</p>
+    <br>Vul de vakken in. Elk gebied van N cellen bevat de getallen 1 t/m N.
+    <br>Gelijke getallen mogen elkaar nooit raken.
 
     <div class="controls">
         <label for="difficulty">Niveau:</label>
@@ -135,11 +160,13 @@
         </select>
         <button onclick="initPuzzle()">Nieuwe Puzzel</button>
         <button class="secondary" onclick="checkPuzzle()">Controleer</button>
-        <button class="secondary" onclick="toggleSolution()">Oplossing Spieken</button>
+        <button class="secondary" onclick="toggleSolution()">Oplossing</button>
     </div>
 
     <div id="grid"></div>
     <div id="message"></div>
+
+    </div>
 
     <script>
         const R = 7;
@@ -169,6 +196,7 @@
                     document.getElementById('message').style.color = "red";
                 }
             }, 50);
+            fitContentToScreen();
         }
 
         function generateBoard() {
@@ -448,11 +476,67 @@
                 }
             });
 
-            document.getElementById('message').innerText = showingSolution ? "Oplossing wordt getoond." : "";
+            document.getElementById('message').innerText = showingSolution ? "Oplossing." : "";
             document.getElementById('message').style.color = "#3498db";
         }
 
         window.onload = initPuzzle;
+
+                /**
+         * Schaalt de content naar het schermformaat als deze groter is dan het scherm.
+         * @param {string} mode - Keuze uit: 'width' (breedte leidend), 'height' (hoogte leidend), of 'both' (volledig passend)
+         */
+        function fitContentToScreen(mode = 'both') {
+            const content = document.getElementById('page-content');
+            if (!content) return;
+
+            // Reset eerst de schaal om de originele afmetingen correct te meten
+            content.style.transform = "none";
+
+            // Haal de afmetingen van de viewport en de content op
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const contentWidth = content.scrollWidth;
+            const contentHeight = content.scrollHeight;
+
+            // Bereken de schaalfactoren
+            const scaleX = viewportWidth / contentWidth;
+            const scaleY = viewportHeight / contentHeight;
+
+            let scale = 1;
+
+            // Bepaal de schaal op basis van de meegegeven parameter
+            if (mode === 'width') {
+                scale = scaleX;
+            } else if (mode === 'height') {
+                scale = scaleY;
+            } else if (mode === 'both') {
+                scale = Math.min(scaleX, scaleY);
+            }
+
+            // Pas de zoom/schaal alleen toe als de content groter is dan het scherm (scale < 1)
+            if (scale < 1) {
+                content.style.transformOrigin = "top center";
+                content.style.transform = `scale(${scale})`;
+            } else {
+                // Reset naar normale grootte als het op het scherm past
+                content.style.transform = "scale(1)";
+            }
+        }
+
+        // --- CONFIGURATIE ---
+        // Kies hier je gewenste modus: 'width', 'height' of 'both'
+        const ZOOM_MODE = 'width';
+
+        // Luister naar het kantelen en resizen van het scherm
+        window.addEventListener('resize', () => {
+            fitContentToScreen(ZOOM_MODE);
+        });
+
+        // Voer de functie direct uit zodra alle elementen volledig zijn ingeladen
+        window.addEventListener('load', () => {
+            fitContentToScreen(ZOOM_MODE);
+        });
     </script>
 </body>
 </html>
