@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamische Tectonic Puzzel (9x7)</title>
+    <title>AI Tectonic Puzzel (9x7)</title>
     <style>
         :root {
             --cell-size: 55px;
@@ -13,7 +13,6 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
-            /* color: #333; */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -61,10 +60,10 @@
             grid-template-columns: repeat(9, var(--cell-size));
             grid-template-rows: repeat(7, var(--cell-size));
             gap: 0;
-            /* background-color: #000; */
             padding: var(--border-thick);
             border-radius: 4px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            background-color: #000;
         }
         .cell {
             display: flex;
@@ -73,8 +72,8 @@
             position: relative;
             box-sizing: border-box;
             border: var(--border-thin) dashed #ccc;
+            background-color: #fff;
         }
-        /* Invoercellen hebben een neutrale lichte achtergrond */
         .cell.input-cell {
             background-color: #fafafa !important;
         }
@@ -88,7 +87,6 @@
             background: transparent;
             color: #2c3e50;
             outline: none;
-            transition: background-color 0.2s ease;
         }
         .cell.input-cell input:focus {
             background-color: #e8f4fd;
@@ -106,7 +104,6 @@
             color: #27ae60 !important;
             background-color: #d4efdf !important;
         }
-        /* Groepsgrenzen dikke lijnen */
         .b-top { border-top: var(--border-thick) solid #000 !important; }
         .b-bottom { border-bottom: var(--border-thick) solid #000 !important; }
         .b-left { border-left: var(--border-thick) solid #000 !important; }
@@ -119,53 +116,41 @@
             min-height: 24px;
         }
 
-        /* CSS: Voorkomt ongewenste scrollbars en zorgt voor een vloeiende overgang */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            font-family: Arial, sans-serif;
-            /* background-color: #f4f4f9;   */
-            /* Pas overflow aan op basis van je voorkeur (bijv. 'hidden' voor 'both', of 'x-hidden' voor 'width') */
-            overflow-x: x-hidden;
         }
-
         #page-content {
-            /* Pas deze breedte aan naar de breedte die je website of element minimaal nodig heeft */
-            width: 525px; /* 1024px; */
+            width: 522px;
             margin: 0 auto;
-            /* background: #ffffff; */
             box-sizing: border-box;
             padding: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.25s ease-out; /* Zorgt voor een vloeiende zoom bij het kantelen */
         }
     </style>
 </head>
 <body>
-    <!-- De hoofdcontainer die geschaald gaat worden -->
     <div id="page-content">
-    <h1>AI_Tectonic Puzzel 9x7</h1>
-    <br>Vul de vakken in. Elk gebied van N cellen bevat de getallen 1 t/m N.
-    <br>Gelijke getallen mogen elkaar nooit raken.
+        <h1>AI Tectonic Puzzel 9x7</h1>
+        <br>Vul de vakken in. Elk gebied van N cellen bevat de getallen 1 t/m N.
+        <br>Gelijke getallen mogen elkaar nooit raken.
 
-    <div class="controls">
-        <label for="difficulty">Niveau:</label>
-        <select id="difficulty">
-            <option value="easy">Makkelijk</option>
-            <option value="medium" selected>Gemiddeld</option>
-            <option value="hard">Moeilijk</option>
-            <option value="expert">Expert</option>
-        </select>
-        <button onclick="initPuzzle()">Nieuwe Puzzel</button>
-        <button class="secondary" onclick="checkPuzzle()">Controleer</button>
-        <button class="secondary" onclick="toggleSolution()">Oplossing</button>
-    </div>
+        <div class="controls">
+            <label for="difficulty">Niveau:</label>
+            <select id="difficulty">
+                <option value="easy">Makkelijk</option>
+                <option value="medium" selected>Gemiddeld</option>
+                <option value="hard">Moeilijk</option>
+                <option value="expert">Expert</option>
+            </select>
+            <button onclick="triggerInit()">Nieuwe Puzzel</button>
+            <button class="secondary" onclick="checkPuzzle()">Controleer</button>
+            <button class="secondary" onclick="toggleSolution()">Oplossing</button>
+        </div>
 
-    <div id="grid"></div>
-    <div id="message"></div>
-
+        <div id="grid"></div>
+        <div id="message"></div>
     </div>
 
     <script>
@@ -174,7 +159,9 @@
         let solutionVals = [];
         let groupIds = [];
         let groupSizes = {};
+        let initialGivens = [];
         let showingSolution = false;
+        let backtrackCounter = 0;
 
         function getGroupColor(id) {
             const hues = [0, 30, 60, 90, 140, 180, 210, 240, 280, 320];
@@ -182,361 +169,283 @@
             return `hsla(${hues[hash]}, 70%, 93%, 1)`;
         }
 
-        function initPuzzle() {
-            document.getElementById('message').innerText = "Puzzel genereren...";
-            document.getElementById('message').style.color = "#333";
+        function triggerInit() {
+            const msg = document.getElementById('message');
+            msg.innerText = "Puzzel genereren...";
+            msg.style.color = "#333";
             showingSolution = false;
-            
+
             setTimeout(() => {
-                if (generateBoard()) {
-                    renderBoard();
-                    document.getElementById('message').innerText = "";
-                } else {
-                    document.getElementById('message').innerText = "Fout bij genereren. Probeer het opnieuw.";
-                    document.getElementById('message').style.color = "red";
-                }
+                initPuzzle();
             }, 50);
-            fitContentToScreen();
+        }
+
+        function initPuzzle() {
+            let success = false;
+            for (let poging = 0; poging < 50; poging++) {
+                backtrackCounter = 0;
+                if (generateBoard()) {
+                    success = true;
+                    break;
+                }
+            }
+
+            if (success) {
+                defineGivens();
+                renderBoard();
+                document.getElementById('message').innerText = "";
+            } else {
+                document.getElementById('message').innerText = "Fout bij genereren. Probeer het opnieuw.";
+                document.getElementById('message').style.color = "red";
+            }
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
         function generateBoard() {
             solutionVals = Array.from({length: R}, () => Array(C).fill(0));
             groupIds = Array.from({length: R}, () => Array(C).fill(0));
             groupSizes = {};
-            let regCounter = 0;
-
-            function getUnassigned() {
-                for(let r=0; r<R; r++) {
-                    for(let c=0; c<C; c++) {
-                        if(groupIds[r][c] === 0) return {r, c};
-                    }
-                }
-                return null;
-            }
-
-            function getNeighbors(r, c) {
-                const res = [];
-                if (r > 0) res.push({r: r-1, c});
-                if (r < R-1) res.push({r: r+1, c});
-                if (c > 0) res.push({r, c: c-1});
-                if (c < C-1) res.push({r, c: c+1});
-                return res;
-            }
-
-            function isValidValue(r, c, val) {
-                for(let dr=-1; dr<=1; dr++) {
-                    for(let dc=-1; dc<=1; dc++) {
-                        if(dr === 0 && dc === 0) continue;
-                        let nr = r + dr, nc = c + dc;
-                        if(nr >= 0 && nr < R && nc >= 0 && nc < C) {
-                            if(solutionVals[nr][nc] === val) return false;
-                        }
-                    }
-                }
-                return true;
-            }
-
-            function shuffle(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            }
-
-            function backtrack() {
-                const pos = getUnassigned();
-                if (!pos) return true;
-                const {r, c} = pos;
-
-                let connected = [{r, c}];
-                let queue = [{r, c}];
-                let visited = new Set([`${r},${c}`]);
-                
-                while(queue.length > 0 && connected.length < 15) {
-                    let curr = queue.shift();
-                    let nbs = getNeighbors(curr.r, curr.c);
-                    for(let nb of nbs) {
-                        let key = `${nb.r},${nb.c}`;
-                        if(groupIds[nb.r][nb.c] === 0 && !visited.has(key)) {
-                            visited.add(key);
-                            connected.push(nb);
-                            queue.push(nb);
-                        }
-                    }
-                }
-
-                let maxPossibleSize = Math.min(5, connected.length);
-                if(maxPossibleSize === 0) return false;
-
-                regCounter++;
-                let rid = regCounter;
-
-                let sizes = [];
-                for(let s=1; s<=maxPossibleSize; s++) sizes.push(s);
-                shuffle(sizes);
-                sizes.sort((a,b) => b - a);
-
-                for(let size of sizes) {
-                    let compOptions = [];
-
-                    function findComps(currComp, availNeighbors) {
-                        if(currComp.size === size) {
-                            compOptions.push(Array.from(currComp).map(k => {
-                                let [cr, cc] = k.split(',').map(Number);
-                                return {r: cr, c: cc};
-                            }));
-                            return true;
-                        }
-                        if(availNeighbors.size === 0) return false;
-
-                        let neighborsList = Array.from(availNeighbors);
-                        shuffle(neighborsList);
-
-                        for(let nextStr of neighborsList) {
-                            let [nr, nc] = nextStr.split(',').map(Number);
-                            let newComp = new Set(currComp);
-                            newComp.add(nextStr);
-
-                            let newAvail = new Set(availNeighbors);
-                            newAvail.delete(nextStr);
-
-                            for(let nb of getNeighbors(nr, nc)) {
-                                let nbStr = `${nb.r},${nb.c}`;
-                                if(groupIds[nb.r][nb.c] === 0 && !newComp.has(nbStr)) {
-                                    newAvail.add(nbStr);
-                                }
-                            }
-
-                            if(findComps(newComp, newAvail)) {
-                                if(compOptions.length >= 2) return true;
+            
+            let currentGroupId = 1;
+            for(let r=0; r<R; r++) {
+                for(let c=0; c<C; c++) {
+                    if(groupIds[r][c] === 0) {
+                        let size = 0;
+                        let queue = [{r, c}];
+                        let id = currentGroupId++;
+                        groupSizes[id] = 0;
+                        
+                        while(queue.length > 0 && size < 5) {
+                            let curr = queue.shift();
+                            if(groupIds[curr.r][curr.c] === 0) {
+                                groupIds[curr.r][curr.c] = id;
+                                groupSizes[id]++;
+                                size++;
+                                
+                                let neighbors = [];
+                                if(curr.r < R-1) neighbors.push({r: curr.r+1, c: curr.c});
+                                if(curr.c < C-1) neighbors.push({r: curr.r, c: curr.c+1});
+                                shuffle(neighbors).forEach(n => queue.push(n));
                             }
                         }
+                    }
+                }
+            }
+
+            return fillValues(0, 0);
+        }
+
+        function fillValues(r, c) {
+            backtrackCounter++;
+            if (backtrackCounter > 2000) return false; 
+
+            if (c === C) { c = 0; r++; }
+            if (r === R) return true;
+
+            let id = groupIds[r][c];
+            let maxVal = groupSizes[id];
+            let nums = shuffle(Array.from({length: maxVal}, (_, i) => i + 1));
+
+            for (let num of nums) {
+                if (isValidValue(r, c, num)) {
+                    solutionVals[r][c] = num;
+                    if (fillValues(r, c + 1)) return true;
+                    solutionVals[r][c] = 0;
+                }
+            }
+            return false;
+        }
+
+        function isValidValue(r, c, num) {
+            let targetId = groupIds[r][c];
+            for (let i = 0; i < R; i++) {
+                for (let j = 0; j < C; j++) {
+                    if (groupIds[i][j] === targetId && solutionVals[i][j] === num) {
                         return false;
                     }
-
-                    let initialAvail = new Set();
-                    for(let nb of getNeighbors(r, c)) {
-                        if(groupIds[nb.r][nb.c] === 0) initialAvail.add(`${nb.r},${nb.c}`);
-                    }
-
-                    findComps(new Set([`${r},${c}`]), initialAvail);
-                    shuffle(compOptions);
-
-                    for(let comp of compOptions) {
-                        for(let cell of comp) groupIds[cell.r][cell.c] = rid;
-                        groupSizes[rid] = size;
-
-                        let vals = [];
-                        for(let v=1; v<=size; v++) vals.push(v);
-
-                        function assignVals(idx) {
-                            if(idx === comp.length) return true;
-                            let cell = comp[idx];
-                            shuffle(vals);
-
-                            for(let v of vals) {
-                                let usedInReg = false;
-                                for(let i=0; i<idx; i++) {
-                                    if(solutionVals[comp[i].r][comp[i].c] === v) { usedInReg = true; break; }
-                                }
-                                if(usedInReg) continue;
-
-                                if(isValidValue(cell.r, cell.c, v)) {
-                                    solutionVals[cell.r][cell.c] = v;
-                                    if(assignVals(idx + 1)) return true;
-                                    solutionVals[cell.r][cell.c] = 0;
-                                }
-                            }
-                            return false;
-                        }
-
-                        if(assignVals(0)) {
-                            if(backtrack()) return true;
-                            for(let cell of comp) solutionVals[cell.r][cell.c] = 0;
-                        }
-
-                        for(let cell of comp) groupIds[cell.r][cell.c] = 0;
-                    }
                 }
-                regCounter--;
-                return false;
             }
 
-            return backtrack();
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    let nr = r + dr;
+                    let nc = c + dc;
+                    if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+                        if (solutionVals[nr][nc] === num) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function defineGivens() {
+            initialGivens = Array.from({length: R}, () => Array(C).fill(false));
+            let diff = document.getElementById('difficulty').value;
+            
+            let rate = 0.4;
+            if (diff === 'easy') rate = 0.5;
+            if (diff === 'hard') rate = 0.3;
+            if (diff === 'expert') rate = 0.2;
+
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c < C; c++) {
+                    if (Math.random() < rate) {
+                        initialGivens[r][c] = true;
+                    }
+                }
+            }
         }
 
         function renderBoard() {
-            const gridDiv = document.getElementById('grid');
-            gridDiv.innerHTML = '';
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
 
-            const difficulty = document.getElementById('difficulty').value;
-            let keepProbability = 0.45; 
-            if(difficulty === 'easy') keepProbability = 0.65;
-            if(difficulty === 'hard') keepProbability = 0.30;
-            if(difficulty === 'expert') keepProbability = 0.18;
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c < C; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.backgroundColor = getGroupColor(groupIds[r][c]);
 
-            for(let r=0; r<R; r++) {
-                for(let c=0; c<C; c++) {
-                    const cellDiv = document.createElement('div');
-                    cellDiv.className = 'cell';
-                    
-                    const gid = groupIds[r][c];
-                    const gSize = groupSizes[gid];
-
-                    if(r === 0 || groupIds[r-1][c] !== gid) cellDiv.classList.add('b-top');
-                    if(r === R-1 || groupIds[r+1][c] !== gid) cellDiv.classList.add('b-bottom');
-                    if(c === 0 || groupIds[r][c-1] !== gid) cellDiv.classList.add('b-left');
-                    if(c === C-1 || groupIds[r][c+1] !== gid) cellDiv.classList.add('b-right');
+                    let id = groupIds[r][c];
+                    if (r === 0 || groupIds[r-1][c] !== id) cell.classList.add('b-top');
+                    if (r === R-1 || groupIds[r+1][c] !== id) cell.classList.add('b-bottom');
+                    if (c === 0 || groupIds[r][c-1] !== id) cell.classList.add('b-left');
+                    if (c === C-1 || groupIds[r][c+1] !== id) cell.classList.add('b-right');
 
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.maxLength = 1;
-                    input.dataset.r = r;
-                    input.dataset.c = c;
+                    input.id = `cell-${r}-${c}`;
 
-                    if(Math.random() < keepProbability) {
+                    if (initialGivens[r][c]) {
+                        cell.classList.add('given');
                         input.value = solutionVals[r][c];
-                        cellDiv.classList.add('given');
-                        cellDiv.style.backgroundColor = getGroupColor(gid);
                     } else {
-                        cellDiv.classList.add('input-cell');
-                        input.addEventListener('input', function() {
-                            this.value = this.value.replace(/[^1-5]/g, '');
-                            if(parseInt(this.value) > gSize) {
-                                this.value = '';
-                            }
-                            cellDiv.classList.remove('error', 'success-cell');
-                        });
+                        cell.classList.add('input-cell');
                     }
 
-                    cellDiv.appendChild(input);
-                    gridDiv.appendChild(cellDiv);
+                    cell.appendChild(input);
+                    grid.appendChild(cell);
                 }
             }
         }
 
         function checkPuzzle() {
-            if (showingSolution) return;
-            let inputs = document.querySelectorAll('.cell input');
-            let allCorrect = true;
-            let missingOrWrong = false;
+            // Haal de huidige grid-waarden op uit de inputvelden van de gebruiker
+            let currentGrid = Array.from({length: R}, () => Array(C).fill(0));
+            let isComplete = true;
 
-            inputs.forEach(input => {
-                let cellDiv = input.parentElement;
-                if(cellDiv.classList.contains('given')) return;
-
-                let r = input.dataset.r;
-                let c = input.dataset.c;
-                let userVal = parseInt(input.value);
-                let correctVal = solutionVals[r][c];
-
-                if(!userVal) {
-                    missingOrWrong = true;
-                    allCorrect = false;
-                } else if(userVal !== correctVal) {
-                    cellDiv.classList.add('error');
-                    missingOrWrong = true;
-                    allCorrect = false;
-                } else {
-                    cellDiv.classList.remove('error');
-                    cellDiv.classList.add('success-cell');
+            // Reset visuele indicators
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c < C; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.parentElement.classList.remove('error', 'success-cell');
+                    let val = parseInt(cell.value);
+                    if (isNaN(val) || val < 1) {
+                        isComplete = false;
+                        currentGrid[r][c] = 0;
+                    } else {
+                        currentGrid[r][c] = val;
+                    }
                 }
-            });
+            }
 
             const msg = document.getElementById('message');
-            if(allCorrect) {
-                msg.innerText = "Gefeliciteerd! De puzzel is helemaal correct opgelost! 🎉";
-                msg.style.color = "#27ae60";
-            } else if(missingOrWrong) {
-                msg.innerText = "Er zitten nog fouten in of de puzzel is noch niet compleet.";
-                msg.style.color = "#e74c3c";
+            if (!isComplete) {
+                msg.innerText = "De puzzel is nog niet volledig ingevuld.";
+                msg.style.color = "red";
+                return;
+            }
+
+            // Valideer de ingevoerde waarden op basis van de officiële Tectonic spelregels
+            let allValid = true;
+
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c < C; c++) {
+                    let val = currentGrid[r][c];
+                    let id = groupIds[r][c];
+                    let maxVal = groupSizes[id];
+                    const cellElement = document.getElementById(`cell-${r}-${c}`).parentElement;
+
+                    let cellValid = true;
+
+                    // Regel 1: Waarde moet tussen 1 en groepsgrootte liggen
+                    if (val > maxVal) {
+                        cellValid = false;
+                    }
+
+                    // Regel 2: Uniek zijn binnen de eigen groep
+                    if (cellValid) {
+                        for (let i = 0; i < R; i++) {
+                            for (let j = 0; j < C; j++) {
+                                if ((i !== r || j !== c) && groupIds[i][j] === id && currentGrid[i][j] === val) {
+                                    cellValid = false;
+                                }
+                            }
+                        }
+                    }
+
+                    // Regel 3: Mag geen gelijke buren raken (horizontaal, verticaal, diagonaal)
+                    if (cellValid) {
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                if (dr === 0 && dc === 0) continue;
+                                let nr = r + dr;
+                                let nc = c + dc;
+                                if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+                                    if (currentGrid[nr][nc] === val) {
+                                        cellValid = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Kleur het vakje op basis van de individuele validatie
+                    if (!cellValid) {
+                        allValid = false;
+                        if (!initialGivens[r][c]) {
+                            cellElement.classList.add('error');
+                        }
+                    } else {
+                        if (!initialGivens[r][c]) {
+                            cellElement.classList.add('success-cell');
+                        }
+                    }
+                }
+            }
+
+            if (allValid) {
+                msg.innerText = "Gefeliciteerd! De puzzel is correct opgelost volgens de Tectonic regels.";
+                msg.style.color = "green";
+            } else {
+                msg.innerText = "Er zitten regelovertredingen in je oplossing (gemarkeerd in rood).";
+                msg.style.color = "red";
             }
         }
 
         function toggleSolution() {
-            let inputs = document.querySelectorAll('.cell input');
             showingSolution = !showingSolution;
-
-            inputs.forEach(input => {
-                let cellDiv = input.parentElement;
-                if(cellDiv.classList.contains('given')) return;
-
-                let r = input.dataset.r;
-                let c = input.dataset.c;
-
-                if(showingSolution) {
-                    input.value = solutionVals[r][c];
-                    cellDiv.classList.add('success-cell');
-                    input.style.pointerEvents = 'none';
-                } else {
-                    input.value = '';
-                    cellDiv.classList.remove('success-cell', 'error');
-                    input.style.pointerEvents = 'auto';
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c < C; c++) {
+                    if (!initialGivens[r][c]) {
+                        const cell = document.getElementById(`cell-${r}-${c}`);
+                        cell.value = showingSolution ? solutionVals[r][c] : '';
+                        cell.parentElement.classList.remove('error', 'success-cell');
+                    }
                 }
-            });
-
-            document.getElementById('message').innerText = showingSolution ? "Oplossing." : "";
-            document.getElementById('message').style.color = "#3498db";
-        }
-
-        window.onload = initPuzzle;
-
-                /**
-         * Schaalt de content naar het schermformaat als deze groter is dan het scherm.
-         * @param {string} mode - Keuze uit: 'width' (breedte leidend), 'height' (hoogte leidend), of 'both' (volledig passend)
-         */
-        function fitContentToScreen(mode = 'both') {
-            const content = document.getElementById('page-content');
-            if (!content) return;
-
-            // Reset eerst de schaal om de originele afmetingen correct te meten
-            content.style.transform = "none";
-
-            // Haal de afmetingen van de viewport en de content op
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const contentWidth = content.scrollWidth;
-            const contentHeight = content.scrollHeight;
-
-            // Bereken de schaalfactoren
-            const scaleX = viewportWidth / contentWidth;
-            const scaleY = viewportHeight / contentHeight;
-
-            let scale = 1;
-
-            // Bepaal de schaal op basis van de meegegeven parameter
-            if (mode === 'width') {
-                scale = scaleX;
-            } else if (mode === 'height') {
-                scale = scaleY;
-            } else if (mode === 'both') {
-                scale = Math.min(scaleX, scaleY);
-            }
-
-            // Pas de zoom/schaal alleen toe als de content groter is dan het scherm (scale < 1)
-            if (scale < 1) {
-                content.style.transformOrigin = "top center";
-                content.style.transform = `scale(${scale})`;
-            } else {
-                // Reset naar normale grootte als het op het scherm past
-                content.style.transform = "scale(1)";
             }
         }
-
-        // --- CONFIGURATIE ---
-        // Kies hier je gewenste modus: 'width', 'height' of 'both'
-        const ZOOM_MODE = 'width';
-
-        // Luister naar het kantelen en resizen van het scherm
-        window.addEventListener('resize', () => {
-            fitContentToScreen(ZOOM_MODE);
-        });
-
-        // Voer de functie direct uit zodra alle elementen volledig zijn ingeladen
-        window.addEventListener('load', () => {
-            fitContentToScreen(ZOOM_MODE);
-        });
+        
+        window.onload = triggerInit;
     </script>
 </body>
 </html>
