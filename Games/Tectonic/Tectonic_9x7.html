@@ -19,10 +19,7 @@
             padding: 20px;
             margin: 0;
         }
-        h1 {
-            margin-bottom: 5px;
-            color: #2c3e50;
-        }
+        h1 { margin-bottom: 5px; color: #2c3e50; }
         .controls {
             margin: 15px 0;
             display: flex;
@@ -40,21 +37,11 @@
             background-color: #fff;
             transition: all 0.2s ease;
         }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        button.secondary {
-            background-color: #95a5a6;
-        }
-        button.secondary:hover {
-            background-color: #7f8c8d;
-        }
+        button { background-color: #3498db; color: white; border: none; font-weight: bold; }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        button.secondary { background-color: #95a5a6; }
+        button.secondary:hover { background-color: #7f8c8d; }
         #grid {
             display: grid;
             grid-template-columns: repeat(9, var(--cell-size));
@@ -74,67 +61,41 @@
             border: var(--border-thin) dashed #ccc;
             background-color: #fff;
         }
-        .cell.input-cell {
-            background-color: #fafafa !important;
-        }
+        .cell.input-cell { background-color: #fafafa !important; }
         .cell input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            background: transparent;
-            color: #2c3e50;
-            outline: none;
+            width: 100%; height: 100%; border: none; text-align: center;
+            font-size: 22px; font-weight: bold; background: transparent;
+            color: #2c3e50; outline: none;
         }
-        .cell.input-cell input:focus {
-            background-color: #e8f4fd;
-        }
-        .cell.given input {
-            color: #000;
-            font-weight: 900;
-            pointer-events: none;
-        }
-        .cell.error input {
-            color: #e74c3c !important;
-            background-color: #fadbd8 !important;
-        }
-        .cell.success-cell input {
-            color: #27ae60 !important;
-            background-color: #d4efdf !important;
-        }
+        .cell.input-cell input:focus { background-color: #e8f4fd; }
+        .cell.given input { color: #000; font-weight: 900; pointer-events: none; }
+        .cell.error input { color: #e74c3c !important; background-color: #fadbd8 !important; }
+        .cell.success-cell input { color: #27ae60 !important; background-color: #d4efdf !important; }
         .b-top { border-top: var(--border-thick) solid #000 !important; }
         .b-bottom { border-bottom: var(--border-thick) solid #000 !important; }
         .b-left { border-left: var(--border-thick) solid #000 !important; }
         .b-right { border-right: var(--border-thick) solid #000 !important; }
-
-        #message {
-            margin-top: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            min-height: 24px;
+        #message { margin-top: 15px; font-size: 16px; font-weight: bold; min-height: 24px; text-align: center; }
+        #page-content { width: 522px; margin: 0 auto; box-sizing: border-box; padding: 10px; }
+        .tectonic-keyboard { display: flex; justify-content: center; gap: 10px; margin: 20px auto; max-width: 500px; padding: 0 10px; }
+        .tectonic-keyboard button {
+            flex: 1; padding: 15px 0; font-size: 1.4rem; font-weight: bold;
+            background-color: #f0f0f0; border: 2px solid #ccc; border-radius: 8px;
+            cursor: pointer; touch-action: manipulation; user-select: none;
         }
-
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-        }
-        #page-content {
-            width: 522px;
-            margin: 0 auto;
-            box-sizing: border-box;
-            padding: 10px;
+        .tectonic-keyboard button:active { background-color: #ddd; }
+        .tectonic-keyboard button.delete-btn { background-color: #ffcccc; border-color: #ff9999; }
+        .tectonic-keyboard button.delete-btn:active { background-color: #ff9999; }
+        @media (max-width: 550px) {
+            #page-content { width: 100%; }
+            :root { --cell-size: 10.5vw; }
         }
     </style>
 </head>
 <body>
     <div id="page-content">
         <h1>AI Tectonic Puzzel 9x7</h1>
-        <br>Vul de vakken in. Elk gebied van N cellen bevat de getallen 1 t/m N.
-        <br>Gelijke getallen mogen elkaar nooit raken.
+        <p>Vul de vakken in. Elk gebied van N cellen bevat de getallen 1 t/m N.<br>Gelijke getallen mogen elkaar nooit raken.</p>
 
         <div class="controls">
             <label for="difficulty">Niveau:</label>
@@ -144,307 +105,317 @@
                 <option value="hard">Moeilijk</option>
                 <option value="expert">Expert</option>
             </select>
-            <button onclick="triggerInit()">Nieuwe Puzzel</button>
+            <button id="new-puzzle-btn" onclick="triggerInitWithLoader()">Nieuwe Puzzel</button>
             <button class="secondary" onclick="checkPuzzle()">Controleer</button>
             <button class="secondary" onclick="toggleSolution()">Oplossing</button>
         </div>
 
         <div id="grid"></div>
+
+        <div class="tectonic-keyboard">
+            <button type="button" onmousedown="voerMobielCijfer(event, 1)" ontouchstart="voerMobielCijfer(event, 1)">1</button>
+            <button type="button" onmousedown="voerMobielCijfer(event, 2)" ontouchstart="voerMobielCijfer(event, 2)">2</button>
+            <button type="button" onmousedown="voerMobielCijfer(event, 3)" ontouchstart="voerMobielCijfer(event, 3)">3</button>
+            <button type="button" onmousedown="voerMobielCijfer(event, 4)" ontouchstart="voerMobielCijfer(event, 4)">4</button>
+            <button type="button" onmousedown="voerMobielCijfer(event, 5)" ontouchstart="voerMobielCijfer(event, 5)">5</button>
+            <button type="button" class="delete-btn" onmousedown="voerMobielCijfer(event, '')" ontouchstart="voerMobielCijfer(event, '')">⌫</button>
+        </div>
+
         <div id="message"></div>
     </div>
 
     <script>
         const R = 7;
         const C = 9;
-        let solutionVals = [];
-        let groupIds = [];
+        let currentGroups = [];
+        let currentSolution = [];
         let groupSizes = {};
-        let initialGivens = [];
-        let showingSolution = false;
-        let backtrackCounter = 0;
+        let actieveTectonicCel = null;
+        let solutionVisible = false;
 
-        function getGroupColor(id) {
-            const hues = [0, 30, 60, 90, 140, 180, 210, 240, 280, 320];
-            const hash = (id * 13) % hues.length;
-            return `hsla(${hues[hash]}, 70%, 93%, 1)`;
-        }
+        document.addEventListener('focusin', (e) => {
+            if (e.target && e.target.tagName === 'INPUT') { actieveTectonicCel = e.target; }
+        });
 
-        function triggerInit() {
-            const msg = document.getElementById('message');
-            msg.innerText = "Puzzel genereren...";
-            msg.style.color = "#333";
-            showingSolution = false;
-
-            setTimeout(() => {
-                initPuzzle();
-            }, 50);
-        }
-
-        function initPuzzle() {
-            let success = false;
-            for (let poging = 0; poging < 50; poging++) {
-                backtrackCounter = 0;
-                if (generateBoard()) {
-                    success = true;
-                    break;
-                }
-            }
-
-            if (success) {
-                defineGivens();
-                renderBoard();
-                document.getElementById('message').innerText = "";
-            } else {
-                document.getElementById('message').innerText = "Fout bij genereren. Probeer het opnieuw.";
-                document.getElementById('message').style.color = "red";
+        function voerMobielCijfer(event, waarde) {
+            event.preventDefault(); 
+            if (actieveTectonicCel && !actieveTectonicCel.parentNode.classList.contains('given')) {
+                actieveTectonicCel.value = waarde;
+                actieveTectonicCel.dispatchEvent(new Event('input', { bubbles: true }));
+                actieveTectonicCel.dispatchEvent(new Event('change', { bubbles: true }));
             }
         }
 
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        function generateBoard() {
-            solutionVals = Array.from({length: R}, () => Array(C).fill(0));
-            groupIds = Array.from({length: R}, () => Array(C).fill(0));
-            groupSizes = {};
-            
+        function generateRandomGroups() {
+            let groups = new Array(R * C).fill(0);
             let currentGroupId = 1;
-            for(let r=0; r<R; r++) {
-                for(let c=0; c<C; c++) {
-                    if(groupIds[r][c] === 0) {
-                        let size = 0;
-                        let queue = [{r, c}];
-                        let id = currentGroupId++;
-                        groupSizes[id] = 0;
-                        
-                        while(queue.length > 0 && size < 5) {
-                            let curr = queue.shift();
-                            if(groupIds[curr.r][curr.c] === 0) {
-                                groupIds[curr.r][curr.c] = id;
-                                groupSizes[id]++;
-                                size++;
-                                
-                                let neighbors = [];
-                                if(curr.r < R-1) neighbors.push({r: curr.r+1, c: curr.c});
-                                if(curr.c < C-1) neighbors.push({r: curr.r, c: curr.c+1});
-                                shuffle(neighbors).forEach(n => queue.push(n));
+            let unassigned = [];
+            for (let i = 0; i < R * C; i++) unassigned.push(i);
+            unassigned.sort(() => Math.random() - 0.5);
+
+            for (let startCell of unassigned) {
+                if (groups[startCell] !== 0) continue;
+                let groupCells = [startCell];
+                groups[startCell] = currentGroupId;
+                let targetSize = Math.floor(Math.random() * 3) + 3; 
+
+                for (let k = 0; k < 15; k++) {
+                    if (groupCells.length >= targetSize) break;
+                    let frontier = [];
+                    for (let cell of groupCells) {
+                        let r = Math.floor(cell / C);
+                        let c = cell % C;
+                        let neighbors = [[r-1, c], [r+1, c], [r, c-1], [r, c+1]];
+                        for (let [nr, nc] of neighbors) {
+                            if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+                                let nIdx = nr * C + nc;
+                                if (groups[nIdx] === 0 && !frontier.includes(nIdx)) frontier.push(nIdx);
+                            }
+                        }
+                    }
+                    if (frontier.length === 0) break;
+                    let chosen = frontier[Math.floor(Math.random() * frontier.length)];
+                    groups[chosen] = currentGroupId;
+                    groupCells.push(chosen);
+                }
+                currentGroupId++;
+            }
+
+            let counts = {};
+            for (let g of groups) counts[g] = (counts[g] || 0) + 1;
+            for (let i = 0; i < R * C; i++) {
+                let gId = groups[i];
+                if (counts[gId] < 3) {
+                    let r = Math.floor(i / C);
+                    let c = i % C;
+                    let neighbors = [[r-1, c], [r+1, c], [r, c-1], [r, c+1]];
+                    for (let [nr, nc] of neighbors) {
+                        if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+                            let nIdx = nr * C + nc;
+                            if (groups[nIdx] !== gId && counts[groups[nIdx]] < 5) {
+                                counts[gId]--;
+                                groups[i] = groups[nIdx];
+                                counts[groups[nIdx]]++;
+                                break;
                             }
                         }
                     }
                 }
             }
 
-            return fillValues(0, 0);
+            let idMap = {};
+            let nextId = 1;
+            for (let i = 0; i < R * C; i++) {
+                let oldId = groups[i];
+                if (!idMap[oldId]) { idMap[oldId] = nextId++; }
+                groups[i] = idMap[oldId];
+            }
+            return groups;
         }
 
-        function fillValues(r, c) {
-            backtrackCounter++;
-            if (backtrackCounter > 2000) return false; 
-
-            if (c === C) { c = 0; r++; }
-            if (r === R) return true;
-
-            let id = groupIds[r][c];
-            let maxVal = groupSizes[id];
-            let nums = shuffle(Array.from({length: maxVal}, (_, i) => i + 1));
-
-            for (let num of nums) {
-                if (isValidValue(r, c, num)) {
-                    solutionVals[r][c] = num;
-                    if (fillValues(r, c + 1)) return true;
-                    solutionVals[r][c] = 0;
-                }
+        function isValid(idx, val, sol, groups, sizes) {
+            let r = Math.floor(idx / C);
+            let c = idx % C;
+            let gId = groups[idx];
+            if (val > sizes[gId]) return false;
+            for (let i = 0; i < R * C; i++) {
+                if (groups[i] === gId && sol[i] === val) return false;
             }
-            return false;
-        }
-
-        function isValidValue(r, c, num) {
-            let targetId = groupIds[r][c];
-            for (let i = 0; i < R; i++) {
-                for (let j = 0; j < C; j++) {
-                    if (groupIds[i][j] === targetId && solutionVals[i][j] === num) {
-                        return false;
-                    }
-                }
-            }
-
             for (let dr = -1; dr <= 1; dr++) {
                 for (let dc = -1; dc <= 1; dc++) {
                     if (dr === 0 && dc === 0) continue;
                     let nr = r + dr;
                     let nc = c + dc;
                     if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
-                        if (solutionVals[nr][nc] === num) return false;
+                        if (sol[nr * C + nc] === val) return false;
                     }
                 }
             }
             return true;
         }
 
-        function defineGivens() {
-            initialGivens = Array.from({length: R}, () => Array(C).fill(false));
-            let diff = document.getElementById('difficulty').value;
-            
-            let rate = 0.4;
-            if (diff === 'easy') rate = 0.5;
-            if (diff === 'hard') rate = 0.3;
-            if (diff === 'expert') rate = 0.2;
+        function solveTectonic(groups, sizes) {
+            let sol = new Array(R * C).fill(0);
+            let startTime = performance.now();
+            let timedOut = false;
 
-            for (let r = 0; r < R; r++) {
-                for (let c = 0; c < C; c++) {
-                    if (Math.random() < rate) {
-                        initialGivens[r][c] = true;
+            function backtrack(idx) {
+                if (performance.now() - startTime > 150) { timedOut = true; return false; }
+                if (idx === R * C) return true;
+                let possibleValues = [];
+                for (let v = 1; v <= sizes[groups[idx]]; v++) possibleValues.push(v);
+                possibleValues.sort(() => Math.random() - 0.5);
+                for (let val of possibleValues) {
+                    if (isValid(idx, val, sol, groups, sizes)) {
+                        sol[idx] = val;
+                        if (backtrack(idx + 1)) return true;
+                        sol[idx] = 0;
+                        if (timedOut) return false;
                     }
                 }
+                return false;
             }
+            let success = backtrack(0);
+            return { success: success && !timedOut, solution: sol };
         }
 
-        function renderBoard() {
+        function triggerInitWithLoader() {
+            const btn = document.getElementById('new-puzzle-btn');
+            const msg = document.getElementById('message');
+            btn.disabled = true;
+            msg.innerText = "Nieuwe puzzel genereren... Een moment geduld.";
+            msg.style.color = "#3498db";
+
+            setTimeout(() => {
+                triggerInit();
+                btn.disabled = false;
+                msg.innerText = "";
+            }, 50);
+        }
+
+        function triggerInit() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
+            solutionVisible = false;
+            let validBoard = false;
+            let attempts = 0;
 
-            for (let r = 0; r < R; r++) {
-                for (let c = 0; c < C; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.style.backgroundColor = getGroupColor(groupIds[r][c]);
-
-                    let id = groupIds[r][c];
-                    if (r === 0 || groupIds[r-1][c] !== id) cell.classList.add('b-top');
-                    if (r === R-1 || groupIds[r+1][c] !== id) cell.classList.add('b-bottom');
-                    if (c === 0 || groupIds[r][c-1] !== id) cell.classList.add('b-left');
-                    if (c === C-1 || groupIds[r][c+1] !== id) cell.classList.add('b-right');
-
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.maxLength = 1;
-                    input.id = `cell-${r}-${c}`;
-
-                    if (initialGivens[r][c]) {
-                        cell.classList.add('given');
-                        input.value = solutionVals[r][c];
-                    } else {
-                        cell.classList.add('input-cell');
-                    }
-
-                    cell.appendChild(input);
-                    grid.appendChild(cell);
+            while (!validBoard && attempts < 100) {
+                attempts++;
+                currentGroups = generateRandomGroups();
+                groupSizes = {};
+                for (let g of currentGroups) { groupSizes[g] = (groupSizes[g] || 0) + 1; }
+                let result = solveTectonic(currentGroups, groupSizes);
+                if (result.success) {
+                    currentSolution = result.solution;
+                    validBoard = true;
                 }
+            }
+
+            const difficulty = document.getElementById('difficulty').value;
+            let fillProbability = 0.4;
+            if (difficulty === 'easy') fillProbability = 0.55;
+            if (difficulty === 'hard') fillProbability = 0.28;
+            if (difficulty === 'expert') fillProbability = 0.18;
+
+            for (let i = 0; i < R * C; i++) {
+                const row = Math.floor(i / C);
+                const col = i % C;
+                const cell = document.createElement('div');
+                cell.className = 'cell input-cell';
+                
+                const currentGroup = currentGroups[i];
+                if (row === 0 || currentGroups[i - C] !== currentGroup) cell.classList.add('b-top');
+                if (row === R - 1 || currentGroups[i + C] !== currentGroup) cell.classList.add('b-bottom');
+                if (col === 0 || currentGroups[i - 1] !== currentGroup) cell.classList.add('b-left');
+                if (col === C - 1 || currentGroups[i + 1] !== currentGroup) cell.classList.add('b-right');
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 1;
+                input.dataset.index = i;
+                input.setAttribute('inputmode', 'none');
+
+                if (Math.random() < fillProbability) {
+                    cell.classList.remove('input-cell');
+                    cell.classList.add('given');
+                    input.value = currentSolution[i];
+                    input.readOnly = true;
+                }
+
+                cell.appendChild(input);
+                grid.appendChild(cell);
             }
         }
 
         function checkPuzzle() {
-            // Haal de huidige grid-waarden op uit de inputvelden van de gebruiker
-            let currentGrid = Array.from({length: R}, () => Array(C).fill(0));
-            let isComplete = true;
-
-            // Reset visuele indicators
-            for (let r = 0; r < R; r++) {
-                for (let c = 0; c < C; c++) {
-                    const cell = document.getElementById(`cell-${r}-${c}`);
-                    cell.parentElement.classList.remove('error', 'success-cell');
-                    let val = parseInt(cell.value);
-                    if (isNaN(val) || val < 1) {
-                        isComplete = false;
-                        currentGrid[r][c] = 0;
-                    } else {
-                        currentGrid[r][c] = val;
-                    }
+            const inputs = document.querySelectorAll('#grid input');
+            let allFilled = true;
+            let currentBoardValues = new Array(R * C).fill(0);
+            
+            inputs.forEach(input => {
+                const idx = parseInt(input.dataset.index);
+                input.parentNode.classList.remove('error', 'success-cell');
+                if (input.value !== '') {
+                    currentBoardValues[idx] = parseInt(input.value);
+                } else {
+                    allFilled = false;
                 }
-            }
+            });
+
+            let globalCorrect = true;
+
+            inputs.forEach(input => {
+                const idx = parseInt(input.dataset.index);
+                const val = currentBoardValues[idx];
+                const cell = input.parentNode;
+                
+                if (val !== 0) {
+                    let r = Math.floor(idx / C);
+                    let c = idx % C;
+                    let gId = currentGroups[idx];
+                    let localValid = true;
+
+                    if (val > groupSizes[gId]) localValid = false;
+
+                    for (let i = 0; i < R * C; i++) {
+                        if (i !== idx && currentGroups[i] === gId && currentBoardValues[i] === val) {
+                            localValid = false;
+                        }
+                    }
+
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            if (dr === 0 && dc === 0) continue;
+                            let nr = r + dr;
+                            let nc = c + dc;
+                            if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+                                if (currentBoardValues[nr * C + nc] === val) localValid = false;
+                            }
+                        }
+                    }
+
+                    if (localValid) {
+                        cell.classList.add('success-cell');
+                    } else {
+                        cell.classList.add('error');
+                        globalCorrect = false;
+                    }
+                } else {
+                    globalCorrect = false;
+                }
+            });
 
             const msg = document.getElementById('message');
-            if (!isComplete) {
-                msg.innerText = "De puzzel is nog niet volledig ingevuld.";
-                msg.style.color = "red";
-                return;
-            }
-
-            // Valideer de ingevoerde waarden op basis van de officiële Tectonic spelregels
-            let allValid = true;
-
-            for (let r = 0; r < R; r++) {
-                for (let c = 0; c < C; c++) {
-                    let val = currentGrid[r][c];
-                    let id = groupIds[r][c];
-                    let maxVal = groupSizes[id];
-                    const cellElement = document.getElementById(`cell-${r}-${c}`).parentElement;
-
-                    let cellValid = true;
-
-                    // Regel 1: Waarde moet tussen 1 en groepsgrootte liggen
-                    if (val > maxVal) {
-                        cellValid = false;
-                    }
-
-                    // Regel 2: Uniek zijn binnen de eigen groep
-                    if (cellValid) {
-                        for (let i = 0; i < R; i++) {
-                            for (let j = 0; j < C; j++) {
-                                if ((i !== r || j !== c) && groupIds[i][j] === id && currentGrid[i][j] === val) {
-                                    cellValid = false;
-                                }
-                            }
-                        }
-                    }
-
-                    // Regel 3: Mag geen gelijke buren raken (horizontaal, verticaal, diagonaal)
-                    if (cellValid) {
-                        for (let dr = -1; dr <= 1; dr++) {
-                            for (let dc = -1; dc <= 1; dc++) {
-                                if (dr === 0 && dc === 0) continue;
-                                let nr = r + dr;
-                                let nc = c + dc;
-                                if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
-                                    if (currentGrid[nr][nc] === val) {
-                                        cellValid = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Kleur het vakje op basis van de individuele validatie
-                    if (!cellValid) {
-                        allValid = false;
-                        if (!initialGivens[r][c]) {
-                            cellElement.classList.add('error');
-                        }
-                    } else {
-                        if (!initialGivens[r][c]) {
-                            cellElement.classList.add('success-cell');
-                        }
-                    }
-                }
-            }
-
-            if (allValid) {
-                msg.innerText = "Gefeliciteerd! De puzzel is correct opgelost volgens de Tectonic regels.";
-                msg.style.color = "green";
+            if (globalCorrect && allFilled) {
+                msg.innerText = "Gefeliciteerd! De puzzel is correct en logisch opgelost.";
+                msg.style.color = "#27ae60";
             } else {
-                msg.innerText = "Er zitten regelovertredingen in je oplossing (gemarkeerd in rood).";
-                msg.style.color = "red";
+                msg.innerText = "Er zitten nog fouten in het grid of de puzzel is nog niet compleet.";
+                msg.style.color = "#e74c3c";
             }
         }
 
         function toggleSolution() {
-            showingSolution = !showingSolution;
-            for (let r = 0; r < R; r++) {
-                for (let c = 0; c < C; c++) {
-                    if (!initialGivens[r][c]) {
-                        const cell = document.getElementById(`cell-${r}-${c}`);
-                        cell.value = showingSolution ? solutionVals[r][c] : '';
-                        cell.parentElement.classList.remove('error', 'success-cell');
-                    }
+            const inputs = document.querySelectorAll('#grid input');
+            solutionVisible = !solutionVisible;
+            inputs.forEach(input => {
+                const idx = parseInt(input.dataset.index);
+                if (!input.parentNode.classList.contains('given')) {
+                    input.value = solutionVisible ? currentSolution[idx] : '';
+                    input.parentNode.classList.remove('error', 'success-cell');
                 }
+            });
+            const msg = document.getElementById('message');
+            if (solutionVisible) {
+                msg.innerText = "Oplossing.";
+                msg.style.color = "#27ae60";
+            } else {
+                msg.innerText = "Puzzel geleegd";
+                msg.style.color = "#e74c3c";
             }
         }
-        
+
         window.onload = triggerInit;
     </script>
 </body>
