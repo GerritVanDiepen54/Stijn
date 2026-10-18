@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Tectonic Puzzel (9x7)</title>
     <style>
+
+			html {
+			  /* Voorkomt scrollbars wanneer de pagina is verkleind */
+			  overflow: auto;
+			}
+
+			body {
+			  /* Zorgt voor een vloeiende overgang bij het dubbelklikken */
+			  transition: transform 0.4s ease-in-out;
+			}
+
+
         :root {
             --cell-size: 55px;
             --border-thick: 3px;
@@ -140,7 +152,7 @@
         });
 
         function voerMobielCijfer(event, waarde) {
-            event.preventDefault(); 
+            event.preventDefault();
             if (actieveTectonicCel && !actieveTectonicCel.parentNode.classList.contains('given')) {
                 actieveTectonicCel.value = waarde;
                 actieveTectonicCel.dispatchEvent(new Event('input', { bubbles: true }));
@@ -159,7 +171,7 @@
                 if (groups[startCell] !== 0) continue;
                 let groupCells = [startCell];
                 groups[startCell] = currentGroupId;
-                let targetSize = Math.floor(Math.random() * 3) + 3; 
+                let targetSize = Math.floor(Math.random() * 3) + 3;
 
                 for (let k = 0; k < 15; k++) {
                     if (groupCells.length >= targetSize) break;
@@ -305,7 +317,7 @@
                 const col = i % C;
                 const cell = document.createElement('div');
                 cell.className = 'cell input-cell';
-                
+
                 const currentGroup = currentGroups[i];
                 if (row === 0 || currentGroups[i - C] !== currentGroup) cell.classList.add('b-top');
                 if (row === R - 1 || currentGroups[i + C] !== currentGroup) cell.classList.add('b-bottom');
@@ -334,7 +346,7 @@
             const inputs = document.querySelectorAll('#grid input');
             let allFilled = true;
             let currentBoardValues = new Array(R * C).fill(0);
-            
+
             inputs.forEach(input => {
                 const idx = parseInt(input.dataset.index);
                 input.parentNode.classList.remove('error', 'success-cell');
@@ -351,7 +363,7 @@
                 const idx = parseInt(input.dataset.index);
                 const val = currentBoardValues[idx];
                 const cell = input.parentNode;
-                
+
                 if (val !== 0) {
                     let r = Math.floor(idx / C);
                     let c = idx % C;
@@ -417,6 +429,52 @@
                 msg.style.color = "#e74c3c";
             }
         }
+
+        // Schakelaar om de zoomstatus bij te houden
+			let isZoomedToFit = false;
+
+			window.addEventListener('dblclick', (e) => {
+			  // Voorkom standaard dubbelklik-gedrag van de browser (zoals tekstselectie)
+			  e.preventDefault();
+
+			  // We pakken de body om de volledige pagina te schalen
+			  const body = document.body;
+
+			  if (isZoomedToFit) {
+				 // Reset de pagina naar de normale grootte en positie
+				 body.style.transform = 'none';
+				 body.style.transformOrigin = 'unset';
+				 body.style.width = 'auto';
+				 body.style.height = 'auto';
+				 isZoomedToFit = false;
+			  } else {
+				 // 1. Zorg dat de body zijn werkelijke content-grootte vastzet voor de berekening
+				 body.style.width = 'max-content';
+				 body.style.height = 'max-content';
+
+				 // 2. Meet de totale breedte en hoogte van alle content samen
+				 const contentWidth = body.scrollWidth;
+				 const contentHeight = body.scrollHeight;
+
+				 // 3. Meet de beschikbare ruimte in het browserscherm
+				 const windowWidth = window.innerWidth;
+				 const windowHeight = window.innerHeight;
+
+				 // 4. Bereken de benodigde schaalfactor voor breedte en hoogte
+				 const scaleX = windowWidth / contentWidth;
+				 const scaleY = windowHeight / contentHeight;
+
+				 // Gebruik Math.min om te zorgen dat ALLES binnen het scherm past zonder scrollbars
+				 const perfectScale = Math.min(scaleX, scaleY);
+
+				 // 5. Pas de zoom/transformatie toe vanuit de linkerbovenhoek
+				 body.style.transformOrigin = 'top left';
+				 body.style.transform = `scale(${perfectScale})`;
+
+				 isZoomedToFit = true;
+			  }
+			});
+
 
         window.onload = triggerInit;
     </script>

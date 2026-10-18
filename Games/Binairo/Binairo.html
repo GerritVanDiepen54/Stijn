@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <title>Binairo Puzzel Game</title>
     <style>
+			html {
+			  /* Voorkomt scrollbars wanneer de pagina is verkleind */
+			  overflow: auto;
+			}
+
+			body {
+			  /* Zorgt voor een vloeiende overgang bij het dubbelklikken */
+			  transition: transform 0.4s ease-in-out;
+			}
+
         :root { --bg-color: #f4f7f6; --cell-size: 40px; --border-color: #333; }
         body { font-family: sans-serif; background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .controls { margin-bottom: 20px; display: flex; gap: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -47,9 +57,55 @@
     </div>
     <div id="message"></div>
     <div class="grid-container"><div id="binairo-grid" class="grid"></div></div>
-    
+
     <!-- Link naar de JavaScript bestanden -->
     <script src="generator.js"></script>
     <script src="game.js"></script>
+    <script>
+        // Schakelaar om de zoomstatus bij te houden
+			let isZoomedToFit = false;
+
+			window.addEventListener('dblclick', (e) => {
+			  // Voorkom standaard dubbelklik-gedrag van de browser (zoals tekstselectie)
+			  e.preventDefault();
+
+			  // We pakken de body om de volledige pagina te schalen
+			  const body = document.body;
+
+			  if (isZoomedToFit) {
+				 // Reset de pagina naar de normale grootte en positie
+				 body.style.transform = 'none';
+				 body.style.transformOrigin = 'unset';
+				 body.style.width = 'auto';
+				 body.style.height = 'auto';
+				 isZoomedToFit = false;
+			  } else {
+				 // 1. Zorg dat de body zijn werkelijke content-grootte vastzet voor de berekening
+				 body.style.width = 'max-content';
+				 body.style.height = 'max-content';
+
+				 // 2. Meet de totale breedte en hoogte van alle content samen
+				 const contentWidth = body.scrollWidth;
+				 const contentHeight = body.scrollHeight;
+
+				 // 3. Meet de beschikbare ruimte in het browserscherm
+				 const windowWidth = window.innerWidth;
+				 const windowHeight = window.innerHeight;
+
+				 // 4. Bereken de benodigde schaalfactor voor breedte en hoogte
+				 const scaleX = windowWidth / contentWidth;
+				 const scaleY = windowHeight / contentHeight;
+
+				 // Gebruik Math.min om te zorgen dat ALLES binnen het scherm past zonder scrollbars
+				 const perfectScale = Math.min(scaleX, scaleY);
+
+				 // 5. Pas de zoom/transformatie toe vanuit de linkerbovenhoek
+				 body.style.transformOrigin = 'top left';
+				 body.style.transform = `scale(${perfectScale})`;
+
+				 isZoomedToFit = true;
+			  }
+			});
+    </script>
 </body>
 </html>
