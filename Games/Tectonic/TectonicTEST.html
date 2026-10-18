@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tectonic Puzzel (9x7)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        select, button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        button:hover { background-color: #ecf0f1; }
+        button.primary { background-color: #3498db; color: white; border: none; }
+        button.primary:hover { background-color: #2980b9; }
+        button.warning { background-color: #e67e22; color: white; border: none; }
+        button.warning:hover { background-color: #d35400; }
+        
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(7, 52px);
+            grid-template-rows: repeat(9, 52px);
+            gap: 0;
+            background-color: #2c3e50;
+            padding: 4px;
+            border-radius: 6px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        .cell {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            box-sizing: border-box;
+            border: 0.5px solid #dcdde1;
+            position: relative;
+        }
+        .cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 22px;
+            background: transparent;
+            outline: none;
+        }
+        /* Vaste startgetallen: Donkerrood */
+        .cell.fixed {
+            font-weight: bold;
+            color: #c0392b !important;
+        }
+        /* Zelf in te vullen getallen: Blauw */
+        .cell input:not(:disabled) {
+            color: #2980b9;
+            font-weight: bold;
+        }
+        /* Krachtige fout-styling: Felrode achtergrond met dikke rand */
+        .cell.incorrect { 
+            background-color: #ffcccc !important; 
+            box-shadow: inset 0 0 0 4px #d63031 !important;
+        }
+        .cell.incorrect input {
+            color: #b71515 !important;
+        }
+        .cell.correct { background-color: #d4edda !important; }
+        
+        /* Dikke zwarte kooiranden */
+        .b-top { border-top: 3.5px solid #1e272e !important; }
+        .b-bottom { border-bottom: 3.5px solid #1e272e !important; }
+        .b-left { border-left: 3.5px solid #1e272e !important; }
+        .b-right { border-right: 3.5px solid #1e272e !important; }
+    </style>
+</head>
+<body>
+
+    <h1>Tectonic (9x7)</h1>
+    
+    <div class="controls">
+        <select id="difficulty">
+            <option value="easy">Makkelijk</option>
+            <option value="medium" selected>Gemiddeld</option>
+            <option value="hard">Moeilijk</option>
+        </select>
+        <button class="primary" onclick="initPuzzle()">Nieuwe puzzel</button>
+        <button onclick="checkPuzzle()">Controle</button>
+        <button class="warning" onclick="clearErrors()">Wis alle fouten</button>
+        <button onclick="showSolution()">Toon Oplossing</button>
+    </div>
+
+    <div id="grid"></div>
+
+    <script>
+        const ROWS = 9;
+        const COLS = 7;
+        let grid = [];
+        let solution = [];
+        
+        // Handmatig gedefinieerde, 100% correcte Tectonic kooien (Groottes tussen 1 en 5)
+        const layouts = [
+            {
+                cages: [
+                    [0, 0, 1, 1, 1, 2, 2],
+                    [0, 0, 3, 1, 1, 2, 2],
+                    [0, 3, 3, 3, 4, 4, 2],
+                    [5, 5, 3, 4, 4, 4, 6],
+                    [5, 5, 7, 7, 7, 6, 6],
+                    [5, 8, 8, 7, 7, 9, 6],
+                    [10, 10, 8, 8, 9, 9, 6],
+                    [10, 10, 11, 8, 12, 9, 9],
+                    [10, 11, 11, 11, 11, 12, 12]
+                ],
+                values: [
+                    [3, 5, 3, 1, 5, 1, 4],
+                    [1, 2, 4, 2, 4, 2, 3],
+                    [4, 3, 5, 1, 3, 1, 5],
+                    [5, 1, 2, 4, 5, 2, 3],
+                    [2, 4, 5, 3, 1, 4, 1],
+                    [3, 1, 2, 4, 2, 3, 2],
+                    [2, 4, 5, 3, 5, 1, 5],
+                    [1, 3, 2, 4, 2, 4, 2],
+                    [5, 4, 5, 1, 3, 1, 3]
+                ]
+            }
+        ];
+
+        const cageColors = [
+            '#ffffff', '#fff9db', '#e8f7ff', '#f3e8ff', '#e8fff3', 
+            '#ffe8e8', '#fdcb6e', '#ffeaa7', '#fab1a0', '#dff9fb', 
+            '#f5cd79', '#f7d794', '#c7ecee', '#778ca3'
+        ];
+
+        let currentLayout = null;
+
+        function initPuzzle() {
+            currentLayout = layouts[0];
+            solution = currentLayout.values;
+            grid = Array(ROWS).fill().map(() => Array(COLS).fill(''));
+            
+            const diff = document.getElementById('difficulty').value;
+            let keepPercentage = 0.45; 
+            if (diff === 'easy') keepPercentage = 0.60;
+            if (diff === 'hard') keepPercentage = 0.28;
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (Math.random() < keepPercentage) {
+                        grid[r][c] = solution[r][c];
+                    }
+                }
+            }
+            drawGrid();
+        }
+
+        function getCageSize(cageId) {
+            let count = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (currentLayout.cages[r][c] === cageId) count++;
+                }
+            }
+            return count;
+        }
+
+        function drawGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    let currentCage = currentLayout.cages[r][c];
+                    let maxAllowedNum = getCageSize(currentCage);
+                    
+                    if (r === 0 || currentLayout.cages[r-1][c] !== currentCage) cell.classList.add('b-top');
+                    if (r === ROWS-1 || currentLayout.cages[r+1][c] !== currentCage) cell.classList.add('b-bottom');
+                    if (c === 0 || currentLayout.cages[r][c-1] !== currentCage) cell.classList.add('b-left');
+                    if (c === COLS-1 || currentLayout.cages[r][c+1] !== currentCage) cell.classList.add('b-right');
+
+                    cell.style.backgroundColor = cageColors[currentCage % cageColors.length];
+
+                    if (grid[r][c] !== '') {
+                        cell.classList.add('fixed');
+                        cell.innerText = grid[r][c];
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.id = `cell-${r}-${c}`;
+                        
+                        input.oninput = function() { 
+                            let validChars = new RegExp(`[^1-${maxAllowedNum}]`, 'g');
+                            this.value = this.value.replace(validChars, ''); 
+                        };
+                        cell.appendChild(input);
+                    }
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function checkPuzzle() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const input = document.getElementById(`cell-${r}-${c}`);
+                    if (input) {
+                        const cellDiv = input.parentElement;
+                        cellDiv.classList.remove('correct', 'incorrect');
+                        if (input.value == solution[r][c]) {
+                            cellDiv.classList.add('correct');
+                        } else if (input.value !== '') {
+                            cellDiv.classList.add('incorrect');
+                        }
+                    }
+                }
+            }
+        }
+
+        function clearErrors() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const input = document.getElementById(`cell-${r}-${c}`);
+                    if (input) {
+                        const cellDiv = input.parentElement;
+                        if (cellDiv.classList.contains('incorrect')) {
+                            input.value = '';
+                            cellDiv.classList.remove('incorrect');
+                        }
+                    }
+                }
+            }
+        }
+
+        function showSolution() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const input = document.getElementById(`cell-${r}-${c}`);
+                    if (input) {
+                        input.value = solution[r][c];
+                        input.parentElement.classList.remove('correct', 'incorrect');
+                    }
+                }
+            }
+        }
+
+        window.onload = initPuzzle;
+    </script>
+</body>
+</html>
