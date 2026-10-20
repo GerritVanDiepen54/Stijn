@@ -25,7 +25,7 @@ window.onbeforeunload = function(){
 
 
 var g_Rows = 10;
-var g_Cols = 10;  
+var g_Cols = 10;
 
 var g_WdtPuzzle = 0;
 var g_HgtPuzzle = 0;
@@ -39,7 +39,7 @@ const g_CampingMaxRows = "Camping.MaxRows";
 const g_CampingMaxColumns = "Camping.MaxColumns";
 const g_CampingTents = "Camping.TentsData";
 
-const g_Boom = "boom.bmp"; 
+const g_Boom = "boom.bmp";
 const g_Tent = "tent.bmp";
 const g_TentTry = "tenttry.bmp";
 const g_Gras = "gras.bmp";
@@ -74,17 +74,17 @@ function Activate(id) {
                 case "" :
                     item.value = "regel";
                     break;
-            
+
                 case "regel" :
                     item.value = "kolom";
                     break;
-                
+
                 case "kolom" :
                     item.value = "";
                     break;
             }
         } else {
-            item.value = ""; 
+            item.value = "";
         }
     }
     DeActivate();
@@ -97,8 +97,8 @@ function AllToGras() {
             let img = document.getElementById(i);
             img.src = "images/Gras.bmp";
         }
-    } 
-    UpdateAllCounters();   
+    }
+    UpdateAllCounters();
 }
 
 
@@ -125,7 +125,7 @@ function ArrayContains(MyArray, Number) {
 // var MyArray = [1, 2, 3, 4, 5, 5, 6, 7, 8, 5, 9, 0];
 // MyArray = IntArraySplice(MyArray,5);
 
-function ArraySplice(MyArray, number) {  
+function ArraySplice(MyArray, number) {
     let arr = [];
 
     for(let i=0; i < MyArray.length; i++){
@@ -154,7 +154,7 @@ function CheckCounter(id) {
         return false;
     } else {
         return true;
-    } 
+    }
 }
 
 
@@ -164,7 +164,7 @@ function CheckTrees() {
     for(let i=1; i <= (g_Rows * g_Cols); i++ ){
         if(IsItem(i, g_Boom) == true) {
             trees.push(i);
-        }  
+        }
     }
 
     var usedtents = [];
@@ -190,7 +190,7 @@ function CheckTrees() {
                         map.set(nrtree,nrtent);
                         usedtents.push(nrtent);
                         changed = true;
-                    }                   
+                    }
                 }
             }
         }
@@ -208,12 +208,12 @@ function CheckTrees() {
     }
     if(nrhilite.length > 0) HiliteItems(nrhilite);
 
-    if(trees.length != map.size) { 
-        msg = "\n\nElke boom heeft geen tent: " + msg;  
+    if(trees.length != map.size) {
+        msg = "\n\nElke boom heeft geen tent: " + msg;
         for (let [key, value] of map) {
             msg = msg + "\nBoom:" + key.toString() + " , Tent:" + value.toString();
         }
-    }   
+    }
     return msg;
 }
 
@@ -241,13 +241,13 @@ function ChangeImage(id){
                 case "kolom":
                     delta = g_Cols;
                     start = curcol;
-                    start = parseInt(start);                   
+                    start = parseInt(start);
                     break;
                 case "regel":
                     delta = 1;
                     start = ((currow - 1) * g_Cols) + 1;
-                    start = parseInt(start);                
-                    break;            
+                    start = parseInt(start);
+                    break;
                 default:
                     break;
             }
@@ -263,14 +263,14 @@ function ChangeImage(id){
                 return;
             }
         }
-        
+
         let curimg = document.getElementById(id).src;
         let newimg = 'images/' + imgX.replace("X_", "") + '.bmp'
-        
+
         // check if active img is same as selected
         if( curimg.includes(newimg) ) {
             newimg = 'images/' + "Gras" + '.bmp'
-        } 
+        }
 
         // set correct image
         document.getElementById(id).src = newimg;
@@ -278,7 +278,7 @@ function ChangeImage(id){
 
         // update number of tents
         CountTents();
-    } 
+    }
 
 }
 
@@ -290,7 +290,7 @@ function Create() {
 
     if(game == null) game = "";
 
-    if(game.length > 0) { 
+    if(game.length > 0) {
         let wdthgt = Math.sqrt(game.length);
         SelectSize(wdthgt.toString());
     }
@@ -309,14 +309,14 @@ function Create() {
     let wdthgt = parseInt(size.value);
     g_Rows = wdthgt;
     g_Cols = g_Rows;
-    
+
     DeActivate();
     Activate("Tent");
     TableCreate(g_Rows, g_Cols);
 
-    let IdList = [ "TablePuzzle" , "TablePuzzle"];
+    // let IdList = [ "TablePuzzle" , "TablePuzzle"];
 
-    ZoomWindow( IdList);
+    // ZoomWindow( IdList);
 
     if (game.length == 0) {
         CreatePuzzle();
@@ -327,8 +327,8 @@ function Create() {
         for(i=0; i < game.length; i++){
             SetImage(i + 1, game.charAt(i));
         }
-        
-        
+
+
         let rowcnt = localStorage.getItem(g_CampingMaxRows);
         // alert("Loaded MaxRow: >" + rowcnt + "<");
         let rowitems = rowcnt.split(":");
@@ -339,7 +339,7 @@ function Create() {
                 document.getElementById(idname).innerHTML = rowitems[i]
             }
 
-        
+
         let colcnt = localStorage.getItem(g_CampingMaxColumns);
         // alert("Loaded MaxCol: >" + colcnt + "<");
         let colitems = colcnt.split(":");
@@ -419,13 +419,13 @@ function CreatePuzzle() {
                 // alert("Gekozen Tentplek uit lijst: " + TentPlek.toString());
                 BoomPlekken = ArraySplice(BoomPlekken, BoomPlek);
                 BoomPlekken = ArraySplice(BoomPlekken, TentPlek);
-                TentPlekken = ArraySplice(TentPlekken, TentPlek); 
+                TentPlekken = ArraySplice(TentPlekken, TentPlek);
 
                 let Bezet = NumbersArround(TentPlek, 1);
                 for(let x=0; x<Bezet.length; x++) {
-                    TentPlekken = ArraySplice(TentPlekken, Bezet[x]); 
+                    TentPlekken = ArraySplice(TentPlekken, Bezet[x]);
                 }
-                
+
                 // bewaar plek boom en tent
                 Bomen.push(BoomPlek);
                 // ShowArray(Bomen, "Alle bomen: \n");
@@ -434,7 +434,7 @@ function CreatePuzzle() {
                 // ShowArray(Tenten, "Alle tenten: \n");
             }
         }
-        
+
     }
 
     // ShowArray(Bomen, "Bomen planten...");
@@ -464,13 +464,13 @@ function CreatePuzzle() {
     for(let i=0; i < Tenten.length; i++) {
         let nr = Tenten[i];
         let img = document.getElementById(nr);
-        if(img)  { 
+        if(img)  {
             img.src = imgname;
         } else {
             err = err + nr.toString() + " "
         }
     }
-    if (err.length > 0 ) { 
+    if (err.length > 0 ) {
         alert("Attentie\n\n" + "Niet gevonden tentplekken: \n" + err);
     }
     // alert("CreatePuzzle... klaar !!");
@@ -541,7 +541,7 @@ function DeActivate() {
 
 
 
- 
+
 function GetActive() {
     const Plekken = ["X_Tent", "X_TentTry" ,"X_Gras" , "X_GrasNat"];
     for( let i= 0; i < Plekken.length; i++) {
@@ -561,13 +561,13 @@ function GetImageValue(id) {
     imgname = imgname.toUpperCase();
     let rtn = " ";
 
-    if(imgname.endsWith("IMAGES/GRAS.BMP")) rtn = "0"; 
-    if(imgname.endsWith("IMAGES/TENT.BMP")) rtn = "1"; 
-    if(imgname.endsWith("IMAGES/BOOM.BMP")) rtn = "2"; 
-    if(imgname.endsWith("IMAGES/GRASNAT.BMP")) rtn = "3"; 
-    if(imgname.endsWith("IMAGES/TENTTRY.BMP")) rtn = "4";   
+    if(imgname.endsWith("IMAGES/GRAS.BMP")) rtn = "0";
+    if(imgname.endsWith("IMAGES/TENT.BMP")) rtn = "1";
+    if(imgname.endsWith("IMAGES/BOOM.BMP")) rtn = "2";
+    if(imgname.endsWith("IMAGES/GRASNAT.BMP")) rtn = "3";
+    if(imgname.endsWith("IMAGES/TENTTRY.BMP")) rtn = "4";
 
-    return rtn;  
+    return rtn;
 }
 
 
@@ -608,7 +608,7 @@ function GetItemArray(ItemBmpName) {
         if(IsItem(i, ItemBmpName) == true) {
                 Items.push(i);
         }
-    } 
+    }
     return Items;
 }
 
@@ -618,11 +618,11 @@ function GetItemsArround(Number, BmpName, Direction) {
     if(Number == null){
         alert("Attentie\n\n"+"Variable 'Number' is undefined.");
         return MyArray;
-    } 
+    }
     if(Direction == null){
         alert("Attentie\n\n"+"Variable 'Direction' is undefined.");
         return MyArray;
-    } 
+    }
 
     var curRow = GetRow(Number);
     var curCol = GetCol(Number);
@@ -631,8 +631,8 @@ function GetItemsArround(Number, BmpName, Direction) {
     if(curCol < g_Cols) MyArray.push(Number + 1);           // rechts
 
     if(curRow > 1) MyArray.push(Number - g_Cols);           // boven
-    if(curRow < g_Rows) MyArray.push(Number + g_Cols);      // onder   
-    
+    if(curRow < g_Rows) MyArray.push(Number + g_Cols);      // onder
+
     if( Direction == g_Direction._All) {
 
         if( (curCol > 1) && (curRow > 1) ) MyArray.push(Number - (g_Cols + 1));           // links boven
@@ -644,7 +644,7 @@ function GetItemsArround(Number, BmpName, Direction) {
     }
 
     var founditems = [];
-    
+
     for(i = 0; i < MyArray.length; i++){
         if(IsItem(MyArray[i] ,BmpName) == true ) founditems.push(MyArray[i]);
     }
@@ -704,7 +704,7 @@ function Help() {
 function HiliteItems(NrArray) {
     for (let i=0; i < NrArray.length; i++){
         ImageBorder(NrArray[i], true);
-    }   
+    }
 }
 
 
@@ -719,7 +719,7 @@ function HideTentsInPuzzle() {
         if(imgname.endsWith("IMAGES/TENT.BMP")) {
             img.src = "images/Gras.bmp";
             g_TentsInPuzzle.push(i);
-        }        
+        }
     }
 }
 
@@ -733,7 +733,7 @@ function ImageBorder(imgid, border){
     } else {
         if(img.style.border == g_redborder) {
             img.style.border = g_greenborder;
-        }       
+        }
     }
 }
 
@@ -748,7 +748,7 @@ function IsItem(Number, ItemName) {
     } else {
         let imgname = item.src;
         imgname = imgname.toUpperCase();
-        if(imgname.endsWith(ItemName.toUpperCase())) found = true;  
+        if(imgname.endsWith(ItemName.toUpperCase())) found = true;
     }
     return found;
 }
@@ -761,10 +761,10 @@ function NumbersArround(Number, Direction) {
 
     if(Number == null){
         alert("Attentie\n\n" + "Variable 'Number' is undefined.");
-    } 
+    }
     if(Direction == null){
         alert("Attentie\n\n" + "Variable 'Direction' is undefined.");
-    } 
+    }
 
     var MyArray = [];
     var curRow = GetRow(Number);
@@ -774,8 +774,8 @@ function NumbersArround(Number, Direction) {
     if(curCol < g_Cols) MyArray.push(Number + 1);           // rechts
 
     if(curRow > 1) MyArray.push(Number - g_Cols);           // boven
-    if(curRow < g_Rows) MyArray.push(Number + g_Cols);      // onder   
-    
+    if(curRow < g_Rows) MyArray.push(Number + g_Cols);      // onder
+
     if( Direction == g_Direction._All) {
 
         if( (curCol > 1) && (curRow > 1) ) MyArray.push(Number - (g_Cols + 1));           // links boven
@@ -817,19 +817,19 @@ function RunAction(evt) {
             if(!ActionOK("Leeg actieve Puzzel")) {
                 evt.target.value = "---";
                 GrasNat_Text("");
-                break;              
+                break;
             };
             UnMark();
             AllToGras();
             evt.target.value = "---";
             GrasNat_Text("");
             break;
- 
+
         case "Alle Tent? naar Tent":
             if(!ActionOK("Alle Tent? naar Tent")) {
                 evt.target.value = "---";
                 GrasNat_Text("");
-                break;              
+                break;
             };
             UnMark();
             TryToTent();
@@ -858,7 +858,7 @@ function RunAction(evt) {
                     let ShowData = Solution_Show();
                     let SolvedShow = ShowData.Solved;
                     let MessageShow = ShowData.Message;
-                    alert("Attentie\n\n" + MessageShow + "\n\nZie gemarkeerde velden");               
+                    alert("Attentie\n\n" + MessageShow + "\n\nZie gemarkeerde velden");
                 }
             }
             evt.target.value = "---";
@@ -957,14 +957,14 @@ function Solution_Show() {
         Solved = true;
     } else {
         Solved = false;
-        Message = "Oplossing is NIET identiek aan puzzel\n"+ 
+        Message = "Oplossing is NIET identiek aan puzzel\n"+
                   ok.toString() + " van de " + g_TentsInPuzzle.length.toString() + " komen overeen";
-            
+
     }
     return { Solved, Message};
 }
 
-function SelectSize(valueToSelect) {    
+function SelectSize(valueToSelect) {
     let element = document.getElementById("PuzzleSize");
     element.value = valueToSelect;
 }
@@ -1013,9 +1013,9 @@ function TableCreate(rows, cols) {
       var tr = document.createElement('tr');
       for (let ic = 1; ic < cols + 2; ic++) {
           var td = document.createElement('td');
-          
+
           if( ir < rows + 1) {
-            
+
             if( ic < cols + 1) {
                 // image op elke plek <= cols
                 var img = document.createElement("img");
@@ -1040,7 +1040,7 @@ function TableCreate(rows, cols) {
                 txt.id = "col_" + ic.toString();
                 txt.innerHTML = "0/0";
                 txt.style.backgroundColor = "white"
-                td.appendChild(txt);               
+                td.appendChild(txt);
             }
           }
           tr.appendChild(td);
@@ -1050,7 +1050,7 @@ function TableCreate(rows, cols) {
     tbl.appendChild(tbdy);
     H.appendChild(tbl);
 
-    
+
 
     // Replacing one element with another
     GameArea.replaceChild(H, GameArea.childNodes[0]);
@@ -1111,10 +1111,10 @@ function TryToTent() {
             let img = document.getElementById(i);
             img.src = "images/Tent.bmp";
         }
-    }  
+    }
 }
 
-   
+
 
 
 function UnMark() {
@@ -1166,7 +1166,7 @@ function UpdateColor(id, IsOK) {
     } else {
         item.style.backgroundColor = "orange"
     }
-    
+
 }
 
 
@@ -1222,7 +1222,7 @@ function CheckAllTrees() {
 }
 
 function CheckAllOpponent(curtrees, curtents, itemtocheck) {
-    
+
     // check itemtocheck with one opponent
     // check itemtocheck without opponent
 
@@ -1272,44 +1272,44 @@ function CheckAllOpponent(curtrees, curtents, itemtocheck) {
 }
 
 
-// ZoomWindow
-// berekent het zoom percentages aan de hand van de array van ID namen
-//
-function ZoomWindow( IdList) {
-    document.body.style.zoom = "100%";
-    let maxX = 0;
-    let maxY = 0;
-    let ScreenWdt = window.innerWidth;
-    let ScreenHgt = window.innerHeight;
+//// ZoomWindow
+//// berekent het zoom percentages aan de hand van de array van ID namen
+////
+//function ZoomWindow( IdList) {
+    //document.body.style.zoom = "100%";
+    //let maxX = 0;
+    //let maxY = 0;
+    //let ScreenWdt = window.innerWidth;
+    //let ScreenHgt = window.innerHeight;
 
-    for(i = 0; i < IdList.length; i++) {
-      let idName = IdList[i];
-    	let idObj = document.getElementById(idName);
+    //for(i = 0; i < IdList.length; i++) {
+      //let idName = IdList[i];
+    	//let idObj = document.getElementById(idName);
 
-      if(idObj){
-        const rect = idObj.getBoundingClientRect();
-        if( rect.right > maxX) maxX = rect.right;
-        if( rect.bottom > maxY) maxY = rect.bottom;
+      //if(idObj){
+        //const rect = idObj.getBoundingClientRect();
+        //if( rect.right > maxX) maxX = rect.right;
+        //if( rect.bottom > maxY) maxY = rect.bottom;
 
-        console.log("IdName: " + idName + "  X: " + rect.right.toString() + "  Y: " + rect.bottom.toString());
-      } else {
-         console.log("ZoomWindow() -> Item NOT found: " + idName );
-      }
-   }
- 
-    let Xzoom = (ScreenWdt / maxX) * 100;
-    let Yzoom = (ScreenHgt / maxY) * 100;
-    let zoomfactor = Xzoom;
-    
-    if (Yzoom < Xzoom) zoomfactor = Yzoom;
+        //console.log("IdName: " + idName + "  X: " + rect.right.toString() + "  Y: " + rect.bottom.toString());
+      //} else {
+         //console.log("ZoomWindow() -> Item NOT found: " + idName );
+      //}
+   //}
 
-    zoomfactor = 0.98 * zoomfactor;  // 2% marge
-    zoomfactor = Math.floor(zoomfactor);
+    //let Xzoom = (ScreenWdt / maxX) * 100;
+    //let Yzoom = (ScreenHgt / maxY) * 100;
+    //let zoomfactor = Xzoom;
 
-    console.log("ScreenWdt: " + ScreenWdt + " / MaxX: " + maxX + " * 100 ");
-    console.log("ScreenHgt: " + ScreenHgt + " / MaxY: " + maxY + " * 100 ");
-    console.log("ZoomFactor: " + zoomfactor.toString() );
-    document.body.style.zoom = zoomfactor.toString() + "%";
-    console.log("ZoomWindow() -> Zoom: " + document.body.style.zoom.toString());
-}
+    //if (Yzoom < Xzoom) zoomfactor = Yzoom;
+
+    //zoomfactor = 0.98 * zoomfactor;  // 2% marge
+    //zoomfactor = Math.floor(zoomfactor);
+
+    //console.log("ScreenWdt: " + ScreenWdt + " / MaxX: " + maxX + " * 100 ");
+    //console.log("ScreenHgt: " + ScreenHgt + " / MaxY: " + maxY + " * 100 ");
+    //console.log("ZoomFactor: " + zoomfactor.toString() );
+    //document.body.style.zoom = zoomfactor.toString() + "%";
+    //console.log("ZoomWindow() -> Zoom: " + document.body.style.zoom.toString());
+// }
 
