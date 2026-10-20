@@ -1,111 +1,292 @@
 <!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <title>Binairo Puzzel Game</title>
-    <style>
-			html {
-			  /* Voorkomt scrollbars wanneer de pagina is verkleind */
-			  overflow: auto;
-			}
+	<html lang="nl">
+	<head>
+		<meta charset="UTF-8">
+		<title>Binairo Puzzel Game</title>
+		<style>
 
-			body {
-			  /* Zorgt voor een vloeiende overgang bij het dubbelklikken */
-			  transition: transform 0.4s ease-in-out;
-			}
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f0f2f5;
+            position: relative;
+            /* Normale cursor als basis */
+            cursor: default;
+        }
 
-        :root { --bg-color: #f4f7f6; --cell-size: 40px; --border-color: #333; }
-        body { font-family: sans-serif; background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .controls { margin-bottom: 20px; display: flex; gap: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        label { font-weight: bold; display: flex; flex-direction: column; gap: 5px; }
-        select, button { padding: 8px 12px; font-size: 14px; border: 1px solid #bdc3c7; border-radius: 4px; cursor: pointer; }
-        button { background-color: #3498db; color: white; border: none; font-weight: bold; }
-        button:hover { background-color: #2980b9; }
-        #message { font-size: 18px; font-weight: bold; margin-bottom: 15px; min-height: 27px; }
-        .success { color: #27ae60; }
-        .error { color: #c0392b; }
-        .grid-container { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-        .grid { display: grid; border: 3px solid var(--border-color); background-color: var(--border-color); gap: 1px; }
-        .cell { width: var(--cell-size); height: var(--cell-size); background-color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer; user-select: none; }
-        .cell.thick-right { border-right: 2px solid var(--border-color); }
-        .cell.thick-bottom { border-bottom: 2px solid var(--border-color); }
-        .cell.fixed { background-color: #eaeded; color: #2c3e50; cursor: not-allowed; }
-        .cell.user-0 { color: #e67e22; }
-        .cell.user-1 { color: #9b59b6; }
-    </style>
-</head>
-<body>
-    <h1>Binairo Puzzel</h1>
-    <div class="controls">
-        <label>Format:
-            <select id="grid-size">
-                <option value="6">6 x 6</option>
-                <option value="8">8 x 8</option>
-                <option value="10">10 x 10</option>
-                <option value="12" selected>12 x 12</option>
-            </select>
-        </label>
-        <label>Niveau:
-            <select id="difficulty">
-                <option value="easy">Makkelijk</option>
-                <option value="medium" selected>Gemiddeld</option>
-                <option value="hard">Moeilijk</option>
-            </select>
-        </label>
-        <button id="start-btn">Start Spel</button>
-        <button id="check-btn" style="background-color: #2ecc71;">Controleer</button>
-    </div>
-    <div id="message"></div>
-    <div class="grid-container"><div id="binairo-grid" class="grid"></div></div>
+        #my-content-wrapper {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 540px;
+            height: 800px;
+            background-color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-    <!-- Link naar de JavaScript bestanden -->
-    <script src="generator.js"></script>
-    <script src="game.js"></script>
-    <script>
-        // Schakelaar om de zoomstatus bij te houden
-			let isZoomedToFit = false;
+        .content-box {
+            text-align: center;
+            font-family: sans-serif;
+        }
 
-			window.addEventListener('dblclick', (e) => {
-			  // Voorkom standaard dubbelklik-gedrag van de browser (zoals tekstselectie)
-			  e.preventDefault();
+        .badge {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+		:root { --bg-color: #f4f7f6; --cell-size: 40px; --border-color: #0c0c0c; }
+			body { font-family: sans-serif; background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+			.controls { margin-bottom: 20px; display: flex; gap: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+			label { font-weight: bold; display: flex; flex-direction: column; gap: 5px; }
+			select, button { padding: 8px 12px; font-size: 14px; border: 1px solid #bdc3c7; border-radius: 4px; cursor: pointer; }
+			button { background-color: #3498db; color: white; border: none; font-weight: bold; }
+			button:hover { background-color: #2980b9; }
+			#message { font-size: 18px; font-weight: bold; margin-bottom: 15px; min-height: 27px; }
+			.success { color: #27ae60; }
+			.error { color: #c0392b; }
+			.grid-container { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+			.grid { display: grid; border: 3px solid var(--border-color); background-color: var(--border-color); gap: 1px; }
+			.cell { width: var(--cell-size); height: var(--cell-size); background-color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer; user-select: none; }
+			.cell.thick-right { border-right: 2px solid var(--border-color); }
+			.cell.thick-bottom { border-bottom: 2px solid var(--border-color); }
+			.cell.fixed { background-color: #eaeded; color: #2c3e50; cursor: not-allowed; }
+			.cell.user-0 { color: #e67e22; }
+			.cell.user-1 { color: #9b59b6; }
+		</style>
+	</head>
 
-			  // We pakken de body om de volledige pagina te schalen
-			  const body = document.body;
+	<body>
+		<div id="my-content-wrapper">
+			<h1>Binairo Puzzel</h1>
+			<div class="controls">
+					<label>Format:
+					<select id="grid-size">
+							<option value="6">6 x 6</option>
+							<option value="8">8 x 8</option>
+							<option value="10">10 x 10</option>
+							<option value="12" selected>12 x 12</option>
+					</select>
+					</label>
+					<label>Niveau:
+					<select id="difficulty">
+							<option value="easy">Makkelijk</option>
+							<option value="medium" selected>Gemiddeld</option>
+							<option value="hard">Moeilijk</option>
+					</select>
+					</label>
+					<button id="start-btn">Start Spel</button>
+					<button id="check-btn" style="background-color: #2ecc71;">Controleer</button>
+			</div>
+			<div id="message"></div>
+			<div class="grid-container"><div id="binairo-grid" class="grid"></div></div>
 
-			  if (isZoomedToFit) {
-				 // Reset de pagina naar de normale grootte en positie
-				 body.style.transform = 'none';
-				 body.style.transformOrigin = 'unset';
-				 body.style.width = 'auto';
-				 body.style.height = 'auto';
-				 isZoomedToFit = false;
-			  } else {
-				 // 1. Zorg dat de body zijn werkelijke content-grootte vastzet voor de berekening
-				 body.style.width = 'max-content';
-				 body.style.height = 'max-content';
+			<!-- Link naar de JavaScript bestanden -->
+			<script src="generator.js"></script>
+			<script src="game.js"></script>
 
-				 // 2. Meet de totale breedte en hoogte van alle content samen
-				 const contentWidth = body.scrollWidth;
-				 const contentHeight = body.scrollHeight;
+			<script>
+				const wrapper = document.getElementById('my-content-wrapper');
 
-				 // 3. Meet de beschikbare ruimte in het browserscherm
-				 const windowWidth = window.innerWidth;
-				 const windowHeight = window.innerHeight;
+				let currentScale = 1;
+				let posX = 0;
+				let posY = 0;
 
-				 // 4. Bereken de benodigde schaalfactor voor breedte en hoogte
-				 const scaleX = windowWidth / contentWidth;
-				 const scaleY = windowHeight / contentHeight;
+				let contentWidth = 400;
+				let contentHeight = 800;
 
-				 // Gebruik Math.min om te zorgen dat ALLES binnen het scherm past zonder scrollbars
-				 const perfectScale = Math.min(scaleX, scaleY);
+				let isDragging = false;
+				let startX = 0;
+				let startY = 0;
 
-				 // 5. Pas de zoom/transformatie toe vanuit de linkerbovenhoek
-				 body.style.transformOrigin = 'top left';
-				 body.style.transform = `scale(${perfectScale})`;
+				window.addEventListener('load', () => {
+					 if (wrapper) {
+						  const originalTransform = wrapper.style.transform;
+						  wrapper.style.transform = 'none';
 
-				 isZoomedToFit = true;
-			  }
-			});
-    </script>
-</body>
+						  const rect = wrapper.getBoundingClientRect();
+						  if (rect.width > 0) contentWidth = rect.width;
+						  if (rect.height > 0) contentHeight = rect.height;
+
+						  wrapper.style.transform = originalTransform;
+						  zoomToFit();
+					 }
+				});
+
+				function zoomToFit() {
+					 if (!wrapper) return;
+
+					 const windowWidth = window.innerWidth;
+					 const windowHeight = window.innerHeight;
+
+					 const scaleX = windowWidth / contentWidth;
+					 const scaleY = windowHeight / contentHeight;
+
+					 currentScale = Math.min(scaleX, scaleY) * 0.95;
+
+					 posX = 0;
+					 posY = 0;
+
+					 applyTransform();
+				}
+
+				function applyTransform() {
+					 currentScale = Math.max(0.05, Math.min(currentScale, 5));
+					 wrapper.style.transform = `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${currentScale})`;
+					 // zoomIndicator.textContent = `Zoom: ${Math.round(currentScale * 100)}%`;
+				}
+
+				// ==========================================
+				// DYNAMISCHE CURSOR & SLEPEN LOGICA
+				// ==========================================
+
+				function startPan(clientX, clientY) {
+					 isDragging = true;
+					 startX = clientX - posX;
+					 startY = clientY - posY;
+					 // Verander de cursor naar een vuist ALLEEN tijdens het actieve slepen
+					 document.body.style.cursor = 'grabbing';
+				}
+
+				function movePan(clientX, clientY) {
+					 if (!isDragging) return;
+					 posX = clientX - startX;
+					 posY = clientY - startY;
+					 applyTransform();
+				}
+
+				function endPan() {
+					 if (!isDragging) return;
+					 isDragging = false;
+					 // Zet de muisaanwijzer direct weer terug naar normaal na loslaten
+					 document.body.style.cursor = 'default';
+				}
+
+				// Muis drag events (Desktop)
+				window.addEventListener('mousedown', (e) => {
+					 // Voorkom dat slepen start als je specifiek op een interactief element klikt (zoals een knop)
+					 if (e.button === 0 && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'A') {
+						  startPan(e.clientX, e.clientY);
+					 }
+				});
+				window.addEventListener('mousemove', (e) => movePan(e.clientX, e.clientY));
+				window.addEventListener('mouseup', endPan);
+
+				// Touch drag events (Mobiel)
+				window.addEventListener('touchstart', (e) => {
+					 if (e.touches.length === 1 && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'A') {
+						  startPan(e.touches[0].clientX, e.touches[0].clientY);
+					 }
+				});
+				window.addEventListener('touchmove', (e) => {
+					 if (e.touches.length === 1 && isDragging) {
+						  e.preventDefault();
+						  movePan(e.touches[0].clientX, e.touches[0].clientY);
+					 }
+				}, { passive: false });
+				window.addEventListener('touchend', endPan);
+
+				// ==========================================
+				// TOETSENBORD, BROWSER-ZOOM & MOBIELE PINCH
+				// ==========================================
+
+				window.addEventListener('keydown', (event) => {
+					 if (event.ctrlKey) return;
+
+					 if (event.key === '+' || event.key === '=') {
+						  event.preventDefault();
+						  currentScale += 0.05;
+						  applyTransform();
+					 }
+					 if (event.key === '-' || event.key === '_') {
+						  event.preventDefault();
+						  currentScale -= 0.05;
+						  applyTransform();
+					 }
+				});
+
+				window.addEventListener('wheel', (event) => {
+					 if (event.ctrlKey) {
+						  event.preventDefault();
+						  if (event.deltaY < 0) {
+								currentScale += 0.05;
+						  } else {
+								currentScale -= 0.05;
+						  }
+						  applyTransform();
+					 }
+				}, { passive: false });
+
+				let touchStartDist = 0;
+				window.addEventListener('touchstart', (e) => {
+					 if (e.touches.length === 2) {
+						  isDragging = false;
+						  document.body.style.cursor = 'default';
+						  touchStartDist = Math.hypot(
+								e.touches[0].clientX - e.touches[1].clientX,
+								e.touches[0].clientY - e.touches[1].clientY
+						  );
+					 }
+				});
+
+				window.addEventListener('touchmove', (e) => {
+					 if (e.touches.length === 2 && touchStartDist > 0) {
+						  e.preventDefault();
+						  const currentDist = Math.hypot(
+								e.touches[0].clientX - e.touches[1].clientX,
+								e.touches[0].clientY - e.touches[1].clientY
+						  );
+						  const delta = currentDist / touchStartDist;
+						  if (delta > 1) currentScale += 0.02;
+						  if (delta < 1) currentScale -= 0.02;
+						  applyTransform();
+						  touchStartDist = currentDist;
+					 }
+				}, { passive: false });
+
+				window.addEventListener('touchend', () => {
+					 touchStartDist = 0;
+				});
+
+				// ==========================================
+				// RESET MECHANISME
+				// ==========================================
+
+				let resizeTimeout;
+				window.addEventListener('resize', () => {
+					 clearTimeout(resizeTimeout);
+					 resizeTimeout = setTimeout(zoomToFit, 100);
+				});
+
+				document.addEventListener('contextmenu', (event) => {
+					 event.preventDefault();
+					 requestAnimationFrame(() => {
+						  zoomToFit();
+					 });
+				}, { passive: false });
+
+				document.addEventListener('dblclick', (event) => {
+					 event.preventDefault();
+					 requestAnimationFrame(() => {
+						  zoomToFit();
+					 });
+				});
+
+			</script>
+		</div>
+	</body>
 </html>
