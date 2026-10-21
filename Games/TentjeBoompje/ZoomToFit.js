@@ -1,160 +1,124 @@
-//(function() {
-    //// Functie die de zoom-to-fit berekening en aanpassing uitvoert
-    //function doZoomToFit() {
-        //// Reset eventuele eerdere zoom om de pure contentgrootte te meten
-        //document.body.style.transform = 'none';
-        //document.body.style.transformOrigin = 'top left';
-        //document.body.style.width = 'auto';
-
-        //// Haal de afmetingen van de viewport en de totale content op
-        //const viewportWidth = window.innerWidth;
-        //const viewportHeight = window.innerHeight;
-
-        //const contentWidth = Math.max(
-            //document.documentElement.scrollWidth,
-            //document.body.scrollWidth
-        //);
-        //const contentHeight = Math.max(
-            //document.documentElement.scrollHeight,
-            //document.body.scrollHeight
-        //);
-
-        //// Bereken de benodigde schaalfactor (kies de kleinste om te zorgen dat alles past)
-        //const scaleX = viewportWidth / contentWidth;
-        //const scaleY = viewportHeight / contentHeight;
-        //const scale = Math.min(scaleX, scaleY, 1); // Maximaal 1 (100%) om overmatig vergroten te voorkomen
-
-        //// Pas de schaling toe via CSS Transform voor de beste cross-browser compatibiliteit
-        //document.body.style.width = (100 / scale) + '%';
-        //document.body.style.transform = `scale(${scale})`;
-    //}
-
-    //// 1. Voer de routine uit zodra de HTML volledig is geladen
-    //if (document.readyState === 'loading') {
-        //window.addEventListener('DOMContentLoaded', doZoomToFit);
-    //} else {
-        //doZoomToFit();
-    //}
-
-    //// Variabelen voor de mobiele longpress detectie
-    //let longpressTimer;
-    //const longpressDuration = 800; // Tijd in milliseconden voor een longpress
-
-    //// 2. Laptop/Desktop: Alleen na een rechtsklik (contextmenu)
-    //window.addEventListener('contextmenu', function(event) {
-        //// Controleer of het een muisklik is (pointerType muis of traditionele klik)
-        //if (event.pointerType === 'mouse' || !('pointerType' in event)) {
-            //event.preventDefault(); // Voorkom het standaard snelmenu van de browser
-            //doZoomToFit();
-        //}
-    //});
-
-    //// 3. Mobiel: Alleen na een longpress (touch events)
-    //window.addEventListener('touchstart', function(event) {
-        //// Start de timer zodra het scherm wordt aangeraakt
-        //longpressTimer = setTimeout(function() {
-            //doZoomToFit();
-        //}, longpressDuration);
-    //}, { passive: true });
-
-    //window.addEventListener('touchend', function() {
-        //// Annuleer de timer als de vinger voortijdig wordt opgetild
-        //clearTimeout(longpressTimer);
-    //});
-
-    //window.addEventListener('touchmove', function() {
-        //// Annuleer de timer als de gebruiker begint te scrollen of slepen
-        //clearTimeout(longpressTimer);
-    //});
-//})();
-
-
 (function() {
-    let originalWidth = 0;
-    let originalHeight = 0;
+  let TARGET_WIDTH = 0;
+  let TARGET_HEIGHT = 0;
+  let wrapper = null;
 
-    // Functie om de allereerste, pure contentgrootte éénmalig vast te leggen
-    function initOriginalSizes() {
-        // Reset eventuele eerdere stylen om puur te meten
-        document.documentElement.style.transform = 'none';
-        document.documentElement.style.width = 'auto';
-        document.documentElement.style.height = 'auto';
-        document.body.style.width = 'auto';
-        document.body.style.height = 'auto';
+  function initWrapper() {
+    wrapper = document.getElementById('zoom-to-fit-wrapper');
+    if (wrapper) return;
 
-        // Leg de échte opstartgrootte van de content vast
-        originalWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
-        originalHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    // --- SLIMME ONAFHANKELIJKE METING ---
+    const elements = document.body.querySelectorAll('*');
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let foundVisibleElement = false;
 
-        // Mocht de meting om wat voor reden ook 0 zijn, pak dan de viewport als veilige fallback
-        if (originalWidth === 0) originalWidth = window.innerWidth;
-        if (originalHeight === 0) originalHeight = window.innerHeight;
-    }
+    // We pakken de breedte van het venster om elementen te herkennen die onbedoeld 100% breed zijn
+    const currentWindowWidth = window.innerWidth;
 
-    function doZoomToFit() {
-        // Als de originele maten nog niet zijn vastgelegd, doe dat dan eerst
-        if (originalWidth === 0 || originalHeight === 0) {
-            initOriginalSizes();
+    elements.forEach(el => {
+      if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.tagName === 'LINK') return;
+
+      const rect = el.getBoundingClientRect();
+
+      if (rect.width > 0 && rect.height > 0) {
+        // FILTER: Als een element de volledige schermbreedte claimt, negeren we de breedte hiervan
+        if (rect.width >= currentWindowWidth - 10 && el.id !== 'zoom-to-fit-wrapper') {
+          const scrollY = window.scrollY || window.pageYOffset;
+          const top = rect.top + scrollY;
+          const bottom = rect.bottom + scrollY;
+          if (top < minY) minY = top;
+          if (bottom > maxY) maxY = bottom;
+          foundVisibleElement = true;
+          return;
         }
 
-        // Haal de actuele venstergrootte op
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
 
-        // Bereken de schaalfactor op basis van de ONGEVERANDERDE originele maten
-        const scaleX = viewportWidth / originalWidth;
-        const scaleY = viewportHeight / originalHeight;
+        const left = rect.left + scrollX;
+        const top = rect.top + scrollY;
+        const right = rect.right + scrollX;
+        const bottom = rect.bottom + scrollY;
 
-        // Kies de kleinste om te zorgen dat alles past, tot maximaal 100% (1)
-        const scale = Math.min(scaleX, scaleY, 1);
-
-        const root = document.documentElement;
-        if (scale < 1) {
-            // Pas de schaling toe op de root (html-tag) zodat alles perfect mee-schaalt
-            root.style.transformOrigin = 'top left';
-            root.style.width = (100 / scale) + 'vw';
-            root.style.height = (100 / scale) + 'vh';
-            root.style.transform = `scale(${scale})`;
-        } else {
-            // Reset naar standaard als het scherm groot genoeg is
-            root.style.transform = 'none';
-            root.style.width = '100vw';
-            root.style.height = '100vh';
-        }
-
-        // Verberg scrollbars die de weergave kunnen verstoren
-        root.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-    }
-
-    // Luister direct naar elke verandering (zowel breedte als hoogte)
-    window.addEventListener('resize', doZoomToFit);
-
-    // Voer uit zodra de pagina en alle elementen (zoals afbeeldingen/tabellen) VOLLEDIG geladen zijn
-    // Dit is cruciaal om de juiste beginmaten te kunnen meten!
-    if (document.readyState === 'complete') {
-        doZoomToFit();
-    } else {
-        window.addEventListener('load', doZoomToFit);
-    }
-
-    // Handmatige triggers (Rechtsklik & Longpress) om de boel eventueel te herberekenen
-    window.addEventListener('contextmenu', function(event) {
-        if (event.pointerType === 'mouse' || !('pointerType' in event)) {
-            event.preventDefault();
-            initOriginalSizes(); // Reset de basismethode bij handmatige trigger
-            doZoomToFit();
-        }
+        if (left < minX) minX = left;
+        if (top < minY) minY = top;
+        if (right > maxX) maxX = right;
+        if (bottom > maxY) maxY = bottom;
+        foundVisibleElement = true;
+      }
     });
 
-    let longpressTimer;
-    window.addEventListener('touchstart', function() {
-        longpressTimer = setTimeout(function() {
-            initOriginalSizes();
-            doZoomToFit();
-        }, 800);
-    }, { passive: true });
+    if (foundVisibleElement) {
+      const padding = 20; // Marge rondom het spel
 
-    window.addEventListener('touchend', function() { clearTimeout(longpressTimer); });
-    window.addEventListener('touchmove', function() { clearTimeout(longpressTimer); });
+      TARGET_WIDTH = (maxX !== -Infinity && minX !== Infinity) ? (maxX - minX) + (padding * 2) : (maxY - minY) + (padding * 2);
+      TARGET_HEIGHT = (maxY - minY) + (padding * 2);
+    } else {
+      TARGET_WIDTH = window.innerWidth;
+      TARGET_HEIGHT = window.innerHeight;
+    }
+    // --------------------------------------------
+
+    wrapper = document.createElement('div');
+    wrapper.id = 'zoom-to-fit-wrapper';
+
+    while (document.body.firstChild) {
+      wrapper.appendChild(document.body.firstChild);
+    }
+    document.body.appendChild(wrapper);
+
+    const root = document.documentElement;
+    root.style.width = '100%';
+    root.style.height = '100%';
+    root.style.overflow = 'hidden';
+    root.style.margin = '0';
+    root.style.padding = '0';
+
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.body.style.overflow = 'hidden';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.position = 'relative';
+
+    wrapper.style.width = TARGET_WIDTH + 'px';
+    wrapper.style.height = TARGET_HEIGHT + 'px';
+    wrapper.style.transformOrigin = 'center center';
+    wrapper.style.position = 'absolute';
+    wrapper.style.top = '50%';
+    wrapper.style.left = '50%';
+  }
+
+  function doZoomToFit() {
+    if (!wrapper) {
+      initWrapper();
+    }
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    const scaleX = viewportWidth / TARGET_WIDTH;
+    const scaleY = viewportHeight / TARGET_HEIGHT;
+    const scale = Math.min(scaleX, scaleY);
+
+    wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+
+  window.triggerZoomToFit = function() {
+    const existing = document.getElementById('zoom-to-fit-wrapper');
+    if (existing) {
+      while (existing.firstChild) {
+        document.body.appendChild(existing.firstChild);
+      }
+      existing.remove();
+      wrapper = null;
+    }
+    doZoomToFit();
+  };
+
+  window.addEventListener('resize', function() {
+    if (wrapper) {
+      doZoomToFit();
+    }
+  });
 })();

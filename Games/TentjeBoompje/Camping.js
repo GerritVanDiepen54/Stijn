@@ -374,6 +374,11 @@ function Create() {
 
     CountTents();
 
+    // Roep dit aan zodra de loop die alle cellen/boompjes aanmaakt volledig klaar is
+    if (typeof window.triggerZoomToFit === 'function') {
+       window.triggerZoomToFit();
+    }
+
 }
 
 
