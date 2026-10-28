@@ -1,2 +1,2 @@
 # Stijn
-Spelletjes voor Stijn
+Spelletjes voor Stijn en Vera
