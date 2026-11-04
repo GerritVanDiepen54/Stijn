@@ -56,9 +56,10 @@
             margin-bottom: 15px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
         }
 
-        button {
+        button, select {
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -69,6 +70,14 @@
             cursor: pointer;
             transition: background-color 0.15s, transform 0.1s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        select {
+            background-color: #ffffff;
+            color: #0f172a;
+            border: 1px solid var(--border-color);
+            outline: none;
+            padding-right: 28px;
         }
 
         button:hover {
@@ -238,16 +247,18 @@
 </head>
 <body>
 
-    <h1>Tectonic 7×9</h1>
-    <p class="subtitle">Vul in elke regio getal van 1 t/m N<br>
-    Een getal mag hetzelfde getal niet raken<br>
-    Niet horizontaal,vertikaal of diagonaal
-    </p>
+    <h1>Tectonic 7×9  (by AI)</h1>
+    <p class="subtitle">Plaats getal in elke regio van 1 t/m N. Getal mag hetzelfde getal nergens raken</p>
 
     <div class="controls">
+        <select id="select-difficulty">
+            <option value="0.45">Makkelijk</option>
+            <option value="0.35" selected>Gemiddeld</option>
+            <option value="0.25">Moeilijk</option>
+        </select>
         <button id="btn-new">Nieuw Spel</button>
-        <button id="btn-reset" class="btn-sec">Herstarten</button>
-        <button id="btn-validate" class="btn-success">Controleer</button>
+        <button id="btn-reset" class="btn-sec">Opnieuw</button>
+        <button id="btn-validate" class="btn-success">Controle</button>
     </div>
 
     <div class="board-container">
@@ -428,7 +439,7 @@
             return null;
         }
 
-        // 3. GENERATIE VAN COMPLETE PUZZEL
+        // 3. GENERATIE VAN PUZZEL MET DYNAMISCHE MOEILIJKHEIDSGRAAD
         function generatePuzzle() {
             let solvedData = null;
             let regData = null;
@@ -445,10 +456,12 @@
             initialBoard = new Array(TOTAL_CELLS).fill(0);
             userBoard = new Array(TOTAL_CELLS).fill(0);
 
-            // Selecteer ~38% van de cellen als hints/gegeven getallen
+            // Haal gekozen moeilijkheidsgraad op
+            let difficultyRatio = parseFloat(document.getElementById('select-difficulty').value);
+
             let indices = Array.from({length: TOTAL_CELLS}, (_, i) => i);
             indices.sort(() => Math.random() - 0.5);
-            let revealCount = Math.floor(TOTAL_CELLS * 0.38);
+            let revealCount = Math.floor(TOTAL_CELLS * difficultyRatio);
 
             for (let i = 0; i < revealCount; i++) {
                 let idx = indices[i];
@@ -627,7 +640,7 @@
             }
         }
 
-        // EVENT LISTENERS & INICIALISATIE
+        // EVENT LISTENERS & INITIALISATIE
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('btn-new').addEventListener('click', startNewGame);
             document.getElementById('btn-reset').addEventListener('click', resetBoard);
