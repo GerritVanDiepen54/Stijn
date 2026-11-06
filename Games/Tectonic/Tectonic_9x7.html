@@ -63,8 +63,8 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 9px 16px;
-            border-radius: 8px;
+            padding: 9px 9px;
+            border-radius: 4px;
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
@@ -77,7 +77,7 @@
             color: #0f172a;
             border: 1px solid var(--border-color);
             outline: none;
-            padding-right: 28px;
+            padding-right: 1px;
         }
 
         button:hover {
@@ -256,9 +256,10 @@
             <option value="0.35" selected>Gemiddeld</option>
             <option value="0.25">Moeilijk</option>
         </select>
-        <button id="btn-new">Nieuw Spel</button>
-        <button id="btn-reset" class="btn-sec">Opnieuw</button>
+        <button id="btn-new">Nieuw</button>
+        <button id="btn-reset" class="btn-sec">Leeg</button>
         <button id="btn-validate" class="btn-success">Controle</button>
+        <button id="btn-help" class="btn-sec">Help</button>
     </div>
 
     <div id="message"></div>
@@ -278,6 +279,10 @@
 
 
     <script>
+
+        // Controleer of het apparaat GEEN hover ondersteunt (zoals gsm en tablet)
+        const isTouchDeviceWithoutHover = window.matchMedia("(hover: none)").matches; 
+
         const COLS = 7;
         const ROWS = 9;
         const TOTAL_CELLS = COLS * ROWS;
@@ -652,12 +657,19 @@
             document.getElementById('btn-new').addEventListener('click', startNewGame);
             document.getElementById('btn-reset').addEventListener('click', resetBoard);
             document.getElementById('btn-validate').addEventListener('click', validateSolution);
+            document.getElementById('btn-help').addEventListener('click', showHelp);
 
-            add_Hover('select-difficulty','Moeilijkheidsgraad: Makkelijk/Middel/Moeilijk');
-            add_Hover('btn-new','Start een nieuwe tectonic...');
-            add_Hover('btn-reset','Leeg alle ingevulde cellen...');
-            add_Hover('btn-validate','Controleer ingevulde cellen...');
-            
+            if(isTouchDeviceWithoutHover){
+                // NOT an Hover device (GSM/Tablet)
+                document.getElementById('btn-help').hidden = false;
+            } else {
+                // Hover device (Laptop/desktop computer)
+                add_Hover('btn-validate','Controleer ingevulde cellen...');
+                add_Hover('select-difficulty','Makkelijk/Gemiddeld/Moeilijk = Moeilijkheidsgraad');
+                add_Hover('btn-new','Start een nieuwe tectonic...');
+                add_Hover('btn-reset','Leeg alle ingevulde cellen...');
+                document.getElementById('btn-help').hidden = true;
+            }
 
             document.querySelectorAll('.num-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -688,20 +700,31 @@
             }
         });
         
-        function add_Hover(id,msghover) {
+        function add_Hover(id,msg_hover) {
             const msg = document.getElementById('message');
-            // 2. Voeg een event listener toe voor wanneer de muis op de knop komt (hover)
+            // Voeg een event listener toe voor wanneer de muis op de knop komt (hover)
             document.getElementById(id).addEventListener('mouseenter', () => {
                 oldcolor = msg.style.color;
                 oldmsg = msg.textContent;
                 msg.style.color = "darkgreen";                
-                msg.textContent = msghover;
+                msg.textContent = msg_hover;
             }); 
-            // 3. Voeg een event listener toe voor wanneer de muis de knop verlaat
+            // Voeg een event listener toe voor wanneer de muis de knop verlaat
             document.getElementById(id).addEventListener('mouseleave', () => {
                 msg.textContent = oldmsg; // Maakt het bericht weer leeg
                 msg.style.color = oldcolor;
             }); 
+        }
+
+        function showHelp(){
+            let msg = "Hulp Overzicht\n" + 
+                      "===============\n"+ 
+                      "Makkelijk/Gemiddeld/Moeilijk = Keuze moeilijkheidsgraad\n" +
+                      "Nieuw: Maak nieuwe Tectonic puzzel\n" +
+                      "Leeg: Maak alle cellen leeg (opnieuw proberen)\n" +
+                      "Controle: Controleer ingevulde cellen\n" +
+                      "Help: Toont deze helptekst"
+            alert(msg);
         }
 
     </script>
