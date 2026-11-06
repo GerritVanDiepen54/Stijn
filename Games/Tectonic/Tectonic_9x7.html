@@ -244,6 +244,10 @@
         .color-7 { background-color: #fff7ed; }
         .color-8 { background-color: #f5f3ff; }
     </style>
+
+    <link href="CSS/dynamic-dialog.css" rel="stylesheet">
+    <script src="JS/dynamic-dialog.js"></script>  
+
 </head>
 <body>
 
@@ -717,16 +721,21 @@
             }); 
         }
 
-        function showHelp(){
-            let msg = "Hulp Overzicht\n" + 
-                      "===============\n"+ 
-                      "Makkelijk/Gemiddeld/Moeilijk = Keuze moeilijkheidsgraad\n" +
-                      "Nieuw: Maak nieuwe Tectonic puzzel\n" +
-                      "Leeg: Maak alle cellen leeg (opnieuw proberen)\n" +
-                      "Controle: Controleer ingevulde cellen\n" +
-                      "Help: Toont deze helptekst"
-            alert(msg);
+        async function showHelp(){
+            let msg = "Makkelijk/Gemiddeld/Moeilijk = Moeilijkheid\n\n" +
+                      "Nieuw = Maak nieuwe Tectonic puzzel\n\n" +
+                      "Leeg = Maak alle cellen leeg (opnieuw proberen)\n\n" +
+                      "Controle = Controleer ingevulde cellen\n\n" +
+                      "Help = Toont deze helptekst"
+
+            const result = await yesnodialog("Help",msg,"OK","",false);
         }
+
+        async function yesnodialog(title = "Attention", message = "Message...",
+                                   txtBtnYes="Ja", txtBtnNo="Nee",showNoButton = true){
+            const result = await showConfirmDialog(title, message, txtBtnYes, txtBtnNo, showNoButton);
+            return result.toString();
+        } 
 
     </script>
 </body>
