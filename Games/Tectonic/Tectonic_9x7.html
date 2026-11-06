@@ -573,7 +573,7 @@
                 generatePuzzle();
                 renderBoard();
                 selectedCell = null;
-                msg.innerText = "== Nieuw spel actief ==";
+                msg.innerText = "++ Nieuw spel actief ++";
                 msg.style.color = "#2563eb";
             }, 30);
         }
@@ -662,6 +662,7 @@
             if(isTouchDeviceWithoutHover){
                 // NOT an Hover device (GSM/Tablet)
                 document.getElementById('btn-help').hidden = false;
+                add_Hover('btn-reset','Leeg alle ingevulde cellen...');
             } else {
                 // Hover device (Laptop/desktop computer)
                 add_Hover('btn-validate','Controleer ingevulde cellen...');
