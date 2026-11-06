@@ -38,7 +38,7 @@
 
         h3 {
             margin: 0 0 5px 0;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: #0f172a;
             text-align: center;
         }
@@ -53,8 +53,8 @@
         .controls {
             display: flex;
             gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            margin-bottom: 5px;
+            flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
         }
@@ -262,6 +262,7 @@
     </div>
 
     <div id="message"></div>
+    
     <div class="board-container">
         <div id="grid"></div>
 
@@ -287,6 +288,9 @@
         let initialBoard = [];   // Vaste gegeven cijfers
         let userBoard = [];      // Huidige stand van de gebruiker
         let selectedCell = null; // Actief geselecteerde cel
+
+        let oldcolor = "";
+        let oldmsg = "";
 
         // 1. REGIO GENERATIE (Grootte 1 t/m 5)
         function generateRegions() {
@@ -627,7 +631,10 @@
                 }
             }
 
+            let oldmsg = "";
+
             const msg = document.getElementById('message');
+
             if (errors > 0) {
                 msg.innerText = `Er zijn ${errors} fouten gevonden (rood omrand).`;
                 msg.style.color = "#ef4444";
@@ -645,6 +652,12 @@
             document.getElementById('btn-new').addEventListener('click', startNewGame);
             document.getElementById('btn-reset').addEventListener('click', resetBoard);
             document.getElementById('btn-validate').addEventListener('click', validateSolution);
+
+            add_Hover('select-difficulty','Moeilijkheidsgraad: Makkelijk/Middel/Moeilijk');
+            add_Hover('btn-new','Start een nieuwe tectonic...');
+            add_Hover('btn-reset','Leeg alle ingevulde cellen...');
+            add_Hover('btn-validate','Controleer ingevulde cellen...');
+            
 
             document.querySelectorAll('.num-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -674,6 +687,23 @@
                 if ((selectedCell + 1) % COLS > 0) selectCell(selectedCell + 1);
             }
         });
+        
+        function add_Hover(id,msghover) {
+            const msg = document.getElementById('message');
+            // 2. Voeg een event listener toe voor wanneer de muis op de knop komt (hover)
+            document.getElementById(id).addEventListener('mouseenter', () => {
+                oldcolor = msg.style.color;
+                oldmsg = msg.textContent;
+                msg.style.color = "darkgreen";                
+                msg.textContent = msghover;
+            }); 
+            // 3. Voeg een event listener toe voor wanneer de muis de knop verlaat
+            document.getElementById(id).addEventListener('mouseleave', () => {
+                msg.textContent = oldmsg; // Maakt het bericht weer leeg
+                msg.style.color = oldcolor;
+            }); 
+        }
+
     </script>
 </body>
 </html>
